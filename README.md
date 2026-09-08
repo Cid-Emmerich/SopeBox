@@ -223,3 +223,7 @@ internal/ui         the tcell interface
 ```
 
 Run the tests with `go test ./...`.
+
+## License
+
+Released under the [MIT License](LICENSE). Copyright (c) 2026 Cid Emmerich.
