@@ -1,0 +1,525 @@
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:podcast="https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md" version="2.0">
+  <channel>
+    <title>No Agenda Show</title>
+    <description>Deconstructing Media with No Agenda, by Adam Curry and John C. Dvorak</description>
+    <link>http://noagendashow.net</link>
+    <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+    <language>en</language>
+    <generator>Sovereign Feeds</generator>
+    <pubDate>Sun, 06 Sep 2026 21:23:00 +0000</pubDate>
+    <lastBuildDate>Sun, 06 Sep 2026 21:23:00 +0000</lastBuildDate>
+    <podcast:locked owner="adam@curry.com">yes</podcast:locked>
+    <podcast:funding url="https://noagendadonations.com">Support the Show!</podcast:funding>
+    <managingEditor>adam@curry.com (Adam Curry)</managingEditor>
+    <webMaster>adam@curry.com (Adam Curry)</webMaster>
+    <itunes:owner>
+      <itunes:email>adam@curry.com</itunes:email>
+      <itunes:name>Adam Curry</itunes:name>
+    </itunes:owner>
+    <image>
+      <url>https://noagendaassets.com/enc/1788729492.44_na-1901-art-feed.jpg</url>
+      <link>http://noagendashow.net</link>
+      <title>No Agenda Show</title>
+      <description>Deconstructing Media with No Agenda, by Adam Curry and John C. Dvorak</description>
+      <width>144</width>
+      <height>144</height>
+    </image>
+    <itunes:summary>A show about politics with No Agenda, by Adam Curry and John C. Dvorak</itunes:summary>
+    <itunes:author><![CDATA[Adam Curry & John C. Dvorak]]></itunes:author>
+    <itunes:image href="https://noagendaassets.com/enc/1788729492.44_na-1901-art-feed.jpg"/>
+    <itunes:explicit>Yes</itunes:explicit>
+    <itunes:keywords>government,agenda,elections,legislation,curry,dvorak,politics,news</itunes:keywords>
+    <itunes:category text="News &amp; Politics"/>
+    <itunes:category text="Comedy"/>
+    <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+      <podcast:valueRecipient name="Value4Value" type="node" address="03ae9f91a0cb8ff43840e3c322c4c61f019d8c1c3cea15a25cfc425ac605e61a4a" split="53"/>
+      <podcast:valueRecipient name="Dreb Scott (Chapter Architect)" type="node" address="02453e4e93322d60219808c00c2e6d1f1c673420e95b5511a33c40cfb4df5e9148" split="5"/>
+      <podcast:valueRecipient name="Clip Custodian" type="node" address="030a58b8653d32b99200a2334cfe913e51dc7d155aa0116c176657a4f1722677a3" customKey="696969" customValue="g96UfnRSUQlwKfzLEoB3" split="20"/>
+      <podcast:valueRecipient name="Sovereign Feeds" address="035ad2c954e264004986da2d9499e1732e5175e1dcef2453c921c6cdcc3536e9d8" type="node" split="5"/>
+      <podcast:valueRecipient name="BoostBot" type="node" address="03d55f4d4c870577e98ac56605a54c5ed20c8897e41197a068fd61bdb580efaa67" customKey="696969" customValue="gq0Z8b1wEftMkFL4vj7E" split="1"/>
+      <podcast:valueRecipient name="Geoff Smith - Various Original Songs" type="node" address="030a58b8653d32b99200a2334cfe913e51dc7d155aa0116c176657a4f1722677a3" customKey="696969" customValue="mXbAWPOMXmz866ZUJv29" split="5"/>
+      <podcast:valueRecipient name="boostbot@fountain.fm" type="node" address="03b6f613e88bd874177c28c6ad83b3baba43c4c656f56be1f8df84669556054b79" customKey="906608" customValue="01IMQkt4BFzAiSynxcQQqd" split="1"/>
+      <podcast:valueRecipient name="Bakfiets" type="node" address="021f548a8ab5eb8e7cf91e4c9777c388463e213485ece9a1808e3c6850084ee630" split="5"/>
+      <podcast:valueRecipient name="Sir Bemrose" type="node" address="035df303dcc65edcf4965960be85c2f65b7910d253a7d6a52dd3768018a83f016a" split="5"/>
+    </podcast:value>
+    <podcast:guid>856cd618-7f34-57ea-9b84-3600f1f65e7f</podcast:guid>
+    <podcast:medium>podcast</podcast:medium>
+    <podcast:complete>no</podcast:complete>
+    <podcast:block>no</podcast:block>
+    <podcast:block id="spotify">yes</podcast:block>
+    <podcast:block id="facebook">yes</podcast:block>
+    <category><![CDATA[News & Politics]]></category>
+    <category>Comedy</category>
+    <podcast:podroll>
+      <podcast:remoteItem feedGuid="991c5078-9383-5e2f-9845-05cbce8ac4dd" feedUrl="https://mp3s.nashownotes.com/catkrss.xml"/>
+      <podcast:remoteItem feedGuid="8ee4cdcf-5baa-5d0c-b7c4-690d9958240b" feedUrl="http://feeds.dhunplugged.com/DHUnplugged"/>
+      <podcast:remoteItem feedGuid="917393e3-1b1e-5cef-ace4-edaa54e1f810" feedUrl="http://mp3s.nashownotes.com/pc20rss.xml"/>
+      <podcast:remoteItem feedGuid="6dfbd8e4-f9f3-5ea1-98a1-574134999b3b" feedUrl="https://mp3s.nashownotes.com/bballrss.xml"/>
+    </podcast:podroll>
+    <podcast:liveItem status="ended" start="2026-09-06T17:32:00.000Z" chat="irc.zeronode.net" end="2026-09-06T21:32:00.000Z">
+      <title>No Agenda Episode 1901 - Live</title>
+      <author><![CDATA[Adam Curry & John C Dvorak]]></author>
+      <description><![CDATA[<p><strong>No Agenda Epsiode 1901 Live Sunday September 6th 2026 </strong><strong>Living Large and LIT!</strong></p>
+<p><strong>Boost us!</strong></p>
+<p><strong>Get a modern app at podcastapps.com</strong></p>
+<p>&nbsp;</p>]]></description>
+      <enclosure length="33" type="audio/mpeg" url="https://op3.dev/e/listen.noagendastream.com/noagenda"/>
+      <guid isPermaLink="false">NA-1901 Live</guid>
+      <itunes:image href="https://noagendaassets.com/enc/1788714398.224_na-1901-lit.jpg"/>
+      <itunes:keywords>noagenda news deconstruction</itunes:keywords>
+      <itunes:subtitle>No Agenda Episode 1901 - Live</itunes:subtitle>
+      <itunes:summary><![CDATA[<p><strong>No Agenda Epsiode 1901 Live Sunday September 6th 2026 </strong><strong>Living Large and LIT!</strong></p>
+<p><strong>Boost us!</strong></p>
+<p><strong>Get a modern app at podcastapps.com</strong></p>
+<p>&nbsp;</p>]]></itunes:summary>
+      <podcast:contentLink href="http://adam.curry.com/html/NoAgendaStreamandCha-1414965812.html">Listen Live in the Troll Room</podcast:contentLink>
+      <itunes:author><![CDATA[Adam Curry & John C Dvorak]]></itunes:author>
+      <link>http://trollroom.io</link>
+      <podcast:chat server="irc.zeronode.net" protocol="irc" accountId="adamc1999" space="#NoAgenda" embedUrl="https://kiwiirc.com/nextclient/irc.zeronode.net/?nick=webtroll?#NoAgenda"/>
+      <podcast:liveValue uri="https://curiohoster.com/event?event_id=c22e6f45-fad8-4f9e-84ab-5c7b4e688a8a" protocol="socket.io"/>
+      <podcast:socialInteract uri="https://psyopshop.com/@adam/113223050457334787" protocol="activitypub" accountId="adam" accountUrl="https://psyopshop.com"/>
+      <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+        <podcast:valueRecipient name="No Agenda Show" type="lnaddress" address="no_agenda_show@strike.me" split="90"/>
+        <podcast:valueRecipient name="Bakfiets" type="lnaddress" address="adam@getalby.com" split="10"/>
+      </podcast:value>
+    </podcast:liveItem>
+    <item>
+      <title><![CDATA[1901 - "Neighbor Narcs"]]></title>
+      <description><![CDATA[<h2>No Agenda Episode 1901 - "Neighbor Narcs"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Neighbor Narcs</strong></p>
+<p>Executive Producers:</p>
+<p>Baron No. Protector of the Rhine estuary.</p>
+<p>Associate Executive Producers:</p>
+<p>John Whiddon</p>
+<p>Sir Mainframe</p>
+<p>Manuka Gold</p>
+<p>Eli The Coffee Guy</p>
+<p>Linda Lupatkin - Imagemakers Ink, Duchess of Jobs</p>
+<p>Knights and Dames:</p>
+<p>Joshua Caraballo &gt; Sir real human being</p>
+<p>Title Changes:</p>
+<p>Sir Mainframe &gt; Sir Mainframe, Barronette of the 7th Fleet, defender of the arch duke and duchess of Japan and the disputed islands</p>
+<p>Order of the Ant:</p>
+<p>Baron No. Protector of the Rhine estuary.</p>
+<p>End of Show Mixes:</p>
+<p>Craig Weinberg (Conspiracy to Reality)</p>
+<p>Jus Baker (Just Dew It III)</p>
+<p>Jus Baker (Small Potatoes)</p>
+<p><a href="https://noagendaartgenerator.com/artist/blue-acorn" target="_blank" rel="noopener">Art By: Blue Acorn</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p>No Agenda Peerage</p>
+<p>RSS Podcast Feed</p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 09/06/2026 16:18:58 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1901N-QueaaCpLg0VwPws4i6ZP27.opml">&nbsp;</a></div>]]></description>
+      <link>http://1901.noagendanotes.com</link>
+      <guid isPermaLink="true">http://1901.noagendanotes.com</guid>
+      <pubDate>Sun, 06 Sep 2026 20:44:11 +0000</pubDate>
+      <podcast:chapters url="https://reflex.livewire.io/chapters/podcast/856cd618-7f34-57ea-9b84-3600f1f65e7f/item/http://1901.noagendanotes.com/chapters/https://mp3s.nashownotes.com/NA-1901-Chapters.json" type="application/json"/>
+      <itunes:subtitle><![CDATA[1901 - "Neighbor Narcs"]]></itunes:subtitle>
+      <itunes:summary><![CDATA[<h2>No Agenda Episode 1901 - "Neighbor Narcs"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Neighbor Narcs</strong></p>
+<p>Executive Producers:</p>
+<p>Baron No. Protector of the Rhine estuary.</p>
+<p>Associate Executive Producers:</p>
+<p>John Whiddon</p>
+<p>Sir Mainframe</p>
+<p>Manuka Gold</p>
+<p>Eli The Coffee Guy</p>
+<p>Linda Lupatkin - Imagemakers Ink, Duchess of Jobs</p>
+<p>Knights and Dames:</p>
+<p>Joshua Caraballo &gt; Sir real human being</p>
+<p>Title Changes:</p>
+<p>Sir Mainframe &gt; Sir Mainframe, Barronette of the 7th Fleet, defender of the arch duke and duchess of Japan and the disputed islands</p>
+<p>Order of the Ant:</p>
+<p>Baron No. Protector of the Rhine estuary.</p>
+<p>End of Show Mixes:</p>
+<p>Craig Weinberg (Conspiracy to Reality)</p>
+<p>Jus Baker (Just Dew It III)</p>
+<p>Jus Baker (Small Potatoes)</p>
+<p><a href="https://noagendaartgenerator.com/artist/blue-acorn" target="_blank" rel="noopener">Art By: Blue Acorn</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p>No Agenda Peerage</p>
+<p>RSS Podcast Feed</p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 09/06/2026 16:18:58 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1901N-QueaaCpLg0VwPws4i6ZP27.opml">&nbsp;</a></div>]]></itunes:summary>
+      <itunes:author><![CDATA[Adam Curry & John C. Dvorak]]></itunes:author>
+      <author><![CDATA[Adam Curry & John C. Dvorak]]></author>
+      <itunes:image href="https://noagendaassets.com/enc/1788729492.44_na-1901-art-feed.jpg"/>
+      <itunes:explicit>No</itunes:explicit>
+      <itunes:keywords>curry,dvorak,noagenda,no,agenda,politics,douchebag</itunes:keywords>
+      <enclosure url="https://op3.dev/e/mp3s.nashownotes.com/NA-1901-2026-09-06-Final.mp3" type="audio/mpeg" length="108974430"/>
+      <podcast:person href="http://curry.com/" img="https://pbs.twimg.com/profile_images/1401922551161442307/XjN2DdFD_400x400.jpg" group="cast" role="host">Adam Curry</podcast:person>
+      <podcast:person group="cast" role="guest host">Rob Dew</podcast:person>
+      <podcast:transcript url="https://mp3s.nashownotes.com/NA-1901-Captions.srt" type="application/srt" rel="captions"/>
+      <itunes:duration>8802</itunes:duration>
+      <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+        <podcast:valueRecipient name="No Agenda Show" type="lnaddress" address="no_agenda_show@strike.me" split="59"/>
+        <podcast:valueRecipient name="Dreb Scott (Chapter Architect)" type="node" address="02453e4e93322d60219808c00c2e6d1f1c673420e95b5511a33c40cfb4df5e9148" split="5"/>
+        <podcast:valueRecipient name="Sovereign Feeds" type="node" address="035ad2c954e264004986da2d9499e1732e5175e1dcef2453c921c6cdcc3536e9d8" split="5"/>
+        <podcast:valueRecipient name="AC" type="lnaddress" address="adamcurry@strike.me" split="5"/>
+        <podcast:valueRecipient name="Clip Collector Steve" type="lnaddress" address="babygreen973@walletofsatoshi.com" split="5"/>
+        <podcast:valueRecipient name="hiddenflower35@getalby.com" type="lnaddress" address="hiddenflower35@getalby.com" split="5"/>
+        <podcast:valueRecipient name="Reflex" type="lnaddress" address="reflex@livewire.io" split="5"/>
+        <podcast:valueRecipient name="darrenoneill@getalby.com" type="lnaddress" address="darrenoneill@getalby.com" split="5"/>
+        <podcast:valueRecipient name="aceackerman@fountain.fm" type="lnaddress" address="03b6f613e88bd874177c28c6ad83b3baba43c4c656f56be1f8df84669556054b79" split="5"/>
+        <podcast:valueRecipient name="Clip Custodian" type="lnaddress" address="clip_custodian@strike.me" split="1"/>
+      </podcast:value>
+    </item>
+    <item>
+      <title><![CDATA[1900 - "Trust The Plan"]]></title>
+      <description><![CDATA[<h2>No Agenda Episode 1900 - "Trust The Plan"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Trust The Plan</strong></p>
+<p>Executive Producers:</p>
+<p>Sir Onymous</p>
+<p>Jason Calacanis</p>
+<p>Sir Donald of the Fire Bottles</p>
+<p>La Jolla Salt</p>
+<p>Martin Marshall</p>
+<p>arthur sundry</p>
+<p>Sean Ryan</p>
+<p>Sir Fay of the Red Brook</p>
+<p>Sir Kirk of Siouxland, Protector of Things with Power Cords</p>
+<p>Christopher Pepper</p>
+<p>Timothy Woody</p>
+<p>Dame astrid, ArchDuchess of Japan and all the disputed Islands in the Japan Sea</p>
+<p>Sir Dan The Man, Earl of SW Florida, Protector of the Islands of Sanibel and Captiva</p>
+<p>Rusty Vervynck</p>
+<p>Sir Brian With an I</p>
+<p>Sir Facetension</p>
+<p>Danielle Carothers</p>
+<p>douglas murray</p>
+<p>Darius</p>
+<p>Tom Player</p>
+<p>Sir Moses</p>
+<p>SDG</p>
+<p>Ian Sloan</p>
+<p>Associate Executive Producers:</p>
+<p>Justin Robinson</p>
+<p>Eli The Coffee Guy</p>
+<p>Scottie K</p>
+<p>Knights and Dames:</p>
+<p>Sean Ryan &gt; Sir Sean Juan of the Bohemian Grove</p>
+<p>Justin Robinson &gt; Sir J Rob, Protector of the Branch Circuits</p>
+<p>Title Changes:</p>
+<p>Sir Donald of the Fire Bottles &gt; Arch-Duke</p>
+<p>SirFacetension &gt; Red-Knight Sir Facetension, Baronet of the Orders of Heart and Ant</p>
+<p>Sir Lead &gt; Baronet Lead</p>
+<p>Order of the Ant:</p>
+<p>Sir Onymous</p>
+<p>Jason Calacanis</p>
+<p>Sir Donald of the Fire Bottles</p>
+<p>La Jolla Salt</p>
+<p>Martin Marshall</p>
+<p>arthur sundry</p>
+<p>Sean Ryan</p>
+<p>Sir Fay of the Red Brook</p>
+<p>Sir Kirk of Siouxland</p>
+<p>Christopher Pepper</p>
+<p>Timothy Woody</p>
+<p>Sir Mark</p>
+<p>Sir Dan The Man</p>
+<p>Rusty Vervynck</p>
+<p>Sir Brian With an I</p>
+<p>Sir Facetension</p>
+<p>Danielle Carothers</p>
+<p>douglas murray</p>
+<p>Darius</p>
+<p>Tom Player</p>
+<p>Sir Moses</p>
+<p>Ian Sloan</p>
+<p>End of Show Mixes:</p>
+<p>Jus Baker (Just Dew It)</p>
+<p>Jus Baker (Don't call it a pod)</p>
+<p><a href="https://noagendaartgenerator.com/artworks/85781" target="_blank" rel="noopener">Art By: Francisco_Scaramanga &mdash; "Penetration Tester"</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p><a href="http://dvorak.org/peerage.htm" target="_blank" rel="noopener">No Agenda Peerage</a></p>
+<p><a href="http://feed.nashownotes.com/rss.xml" target="_blank" rel="noopener">RSS Podcast Feed</a></p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 09/03/2026 16:18:39 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1900T-gSmpZdxvWXd9pBVGBG4jqWG69pVCTd.opml">&nbsp;</a></div>]]></description>
+      <link>http://1900.noagendanotes.com</link>
+      <guid isPermaLink="true">http://1900.noagendanotes.com</guid>
+      <pubDate>Thu, 03 Sep 2026 21:21:04 +0000</pubDate>
+      <podcast:chapters url="https://reflex.livewire.io/chapters/podcast/856cd618-7f34-57ea-9b84-3600f1f65e7f/item/http://1900.noagendanotes.com/chapters/https://mp3s.nashownotes.com/NA-1900-Chapters.json" type="application/json"/>
+      <itunes:subtitle><![CDATA[1900 - "Trust The Plan"]]></itunes:subtitle>
+      <itunes:summary><![CDATA[<h2>No Agenda Episode 1900 - "Trust The Plan"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Trust The Plan</strong></p>
+<p>Executive Producers:</p>
+<p>Sir Onymous</p>
+<p>Jason Calacanis</p>
+<p>Sir Donald of the Fire Bottles</p>
+<p>La Jolla Salt</p>
+<p>Martin Marshall</p>
+<p>arthur sundry</p>
+<p>Sean Ryan</p>
+<p>Sir Fay of the Red Brook</p>
+<p>Sir Kirk of Siouxland, Protector of Things with Power Cords</p>
+<p>Christopher Pepper</p>
+<p>Timothy Woody</p>
+<p>Dame astrid, ArchDuchess of Japan and all the disputed Islands in the Japan Sea</p>
+<p>Sir Dan The Man, Earl of SW Florida, Protector of the Islands of Sanibel and Captiva</p>
+<p>Rusty Vervynck</p>
+<p>Sir Brian With an I</p>
+<p>Sir Facetension</p>
+<p>Danielle Carothers</p>
+<p>douglas murray</p>
+<p>Darius</p>
+<p>Tom Player</p>
+<p>Sir Moses</p>
+<p>SDG</p>
+<p>Ian Sloan</p>
+<p>Associate Executive Producers:</p>
+<p>Justin Robinson</p>
+<p>Eli The Coffee Guy</p>
+<p>Scottie K</p>
+<p>Knights and Dames:</p>
+<p>Sean Ryan &gt; Sir Sean Juan of the Bohemian Grove</p>
+<p>Justin Robinson &gt; Sir J Rob, Protector of the Branch Circuits</p>
+<p>Title Changes:</p>
+<p>Sir Donald of the Fire Bottles &gt; Arch-Duke</p>
+<p>SirFacetension &gt; Red-Knight Sir Facetension, Baronet of the Orders of Heart and Ant</p>
+<p>Sir Lead &gt; Baronet Lead</p>
+<p>Order of the Ant:</p>
+<p>Sir Onymous</p>
+<p>Jason Calacanis</p>
+<p>Sir Donald of the Fire Bottles</p>
+<p>La Jolla Salt</p>
+<p>Martin Marshall</p>
+<p>arthur sundry</p>
+<p>Sean Ryan</p>
+<p>Sir Fay of the Red Brook</p>
+<p>Sir Kirk of Siouxland</p>
+<p>Christopher Pepper</p>
+<p>Timothy Woody</p>
+<p>Sir Mark</p>
+<p>Sir Dan The Man</p>
+<p>Rusty Vervynck</p>
+<p>Sir Brian With an I</p>
+<p>Sir Facetension</p>
+<p>Danielle Carothers</p>
+<p>douglas murray</p>
+<p>Darius</p>
+<p>Tom Player</p>
+<p>Sir Moses</p>
+<p>Ian Sloan</p>
+<p>End of Show Mixes:</p>
+<p>Jus Baker (Just Dew It)</p>
+<p>Jus Baker (Don't call it a pod)</p>
+<p><a href="https://noagendaartgenerator.com/artworks/85781" target="_blank" rel="noopener">Art By: Francisco_Scaramanga &mdash; "Penetration Tester"</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p><a href="http://dvorak.org/peerage.htm" target="_blank" rel="noopener">No Agenda Peerage</a></p>
+<p><a href="http://feed.nashownotes.com/rss.xml" target="_blank" rel="noopener">RSS Podcast Feed</a></p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 09/03/2026 16:18:39 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1900T-gSmpZdxvWXd9pBVGBG4jqWG69pVCTd.opml">&nbsp;</a></div>]]></itunes:summary>
+      <itunes:author><![CDATA[Adam Curry & John C. Dvorak]]></itunes:author>
+      <author><![CDATA[Adam Curry & John C. Dvorak]]></author>
+      <itunes:image href="https://noagendaassets.com/enc/1788469962.464_na-1900-art-feed.jpg"/>
+      <itunes:explicit>No</itunes:explicit>
+      <itunes:keywords>curry,dvorak,noagenda,no,agenda,politics,douchebag</itunes:keywords>
+      <enclosure url="https://op3.dev/e/mp3s.nashownotes.com/NA-1900-2026-09-03-Final.mp3" type="audio/mpeg" length="122443659"/>
+      <podcast:person href="http://curry.com/" img="https://pbs.twimg.com/profile_images/1401922551161442307/XjN2DdFD_400x400.jpg" group="cast" role="host">Adam Curry</podcast:person>
+      <podcast:person group="cast" role="guest host">Rob Dew</podcast:person>
+      <podcast:transcript url="https://mp3s.nashownotes.com/NA-1900-Captions.srt" type="application/srt" rel="captions"/>
+      <itunes:duration>9891</itunes:duration>
+      <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+        <podcast:valueRecipient name="No Agenda Show" type="lnaddress" address="no_agenda_show@strike.me" split="59"/>
+        <podcast:valueRecipient name="Dreb Scott (Chapter Architect)" type="node" address="02453e4e93322d60219808c00c2e6d1f1c673420e95b5511a33c40cfb4df5e9148" split="5"/>
+        <podcast:valueRecipient name="Sovereign Feeds" type="node" address="035ad2c954e264004986da2d9499e1732e5175e1dcef2453c921c6cdcc3536e9d8" split="5"/>
+        <podcast:valueRecipient name="AC" type="lnaddress" address="adamcurry@strike.me" split="5"/>
+        <podcast:valueRecipient name="Clip Collector Steve" type="lnaddress" address="babygreen973@walletofsatoshi.com" split="5"/>
+        <podcast:valueRecipient name="hiddenflower35@getalby.com" type="lnaddress" address="hiddenflower35@getalby.com" split="5"/>
+        <podcast:valueRecipient name="Reflex" type="lnaddress" address="reflex@livewire.io" split="5"/>
+        <podcast:valueRecipient name="darrenoneill@getalby.com" type="lnaddress" address="darrenoneill@getalby.com" split="5"/>
+        <podcast:valueRecipient name="aceackerman@fountain.fm" type="lnaddress" address="03b6f613e88bd874177c28c6ad83b3baba43c4c656f56be1f8df84669556054b79" split="5"/>
+        <podcast:valueRecipient name="Clip Custodian" type="lnaddress" address="clip_custodian@strike.me" split="1"/>
+      </podcast:value>
+    </item>
+    <item>
+      <title><![CDATA[1899 - "Asymmetric Intimacy"]]></title>
+      <description><![CDATA[<h2>No Agenda Episode 1899 - "Asymmetric Intimacy"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Asymmetric Intimacy"</strong></p>
+<p>Executive Producers:</p>
+<p>Stuart Greene</p>
+<p>Jessica Greene</p>
+<p>Sir Sala Hauser</p>
+<p>Sir Ty of God's Flat Earth</p>
+<p>Eric Wilka</p>
+<p>Dr. Sir OneAwesome Jason PhD.</p>
+<p>Tom Beben</p>
+<p>Katherine Nicholas</p>
+<p>Sir JoFo</p>
+<p>Peter Bickford</p>
+<p>Raymond Lee (switcheroo from Indy NA Meetup)</p>
+<p>Indy NA Meetup</p>
+<p>The Sydney No Agenda Meetup Mob &mdash; Sir Chris Wilson</p>
+<p>Associate Executive Producers:</p>
+<p>Manuka Gold Family &mdash; manukagold.com (code TREASURE)</p>
+<p>Eli The Coffee Guy &mdash; Gigawatt Coffee Roasters (code ITM20)</p>
+<p>Annette Miller (switcheroo from Indy NA Meetup)</p>
+<p>Indy NA Meetup</p>
+<p>Linda Lupatkin &mdash; Imagemakers Ink, Duchess of Jobs</p>
+<p>Knights and Dames:</p>
+<p>Stuart Greene &gt; Sir Troubleshooter</p>
+<p>Raymond Lee &gt; Sir Raymond</p>
+<p>Jessica Greene &gt; Dame Doula at your Cervix</p>
+<p>Annette Miller &gt; Dame Near Perfect</p>
+<p>Order of the Ant:</p>
+<p>Stuart Greene</p>
+<p>Jessica Greene</p>
+<p>Sir Sala Hauser</p>
+<p>Sir Ty of God's Flat Earth</p>
+<p>Eric Wilka</p>
+<p>Dr. Sir OneAwesome Jason PhD.</p>
+<p>Tom Beben</p>
+<p>Katherine Nicholas</p>
+<p>Sir JoFo</p>
+<p>Peter Bickford</p>
+<p>Raymond Lee</p>
+<p>End of Show Mixes:</p>
+<p>Jus Baker (Where's The Beef)</p>
+<p>Jus Baker (All-In Jason Calacanis)</p>
+<p>Jus Baker (The Biggest Oil Deal)</p>
+<p><a href="https://noagendaartgenerator.com/artist/tyler-brown" target="_blank" rel="noopener">Art By: Tyler Brown</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p><a href="http://dvorak.org/peerage.htm" target="_blank" rel="noopener">No Agenda Peerage</a></p>
+<p><a href="http://feed.nashownotes.com/rss.xml" target="_blank" rel="noopener">RSS Podcast Feed</a></p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 08/30/2026 15:55:34 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1899A-g6fGXgCt8pK2BXHgcXKpjKqNkXSt0C.opml">&nbsp;</a></div>]]></description>
+      <link>http://1899.noagendanotes.com</link>
+      <guid isPermaLink="true">http://1899.noagendanotes.com</guid>
+      <pubDate>Sun, 30 Aug 2026 20:45:35 +0000</pubDate>
+      <podcast:chapters url="https://reflex.livewire.io/chapters/podcast/856cd618-7f34-57ea-9b84-3600f1f65e7f/item/http://1899.noagendanotes.com/chapters/https://mp3s.nashownotes.com/NA-1899-Chapters.json" type="application/json"/>
+      <itunes:subtitle><![CDATA[1899 - "Asymmetric Intimacy"]]></itunes:subtitle>
+      <itunes:summary><![CDATA[<h2>No Agenda Episode 1899 - "Asymmetric Intimacy"</h2>
+<div>
+<div>
+<div id="tabcredits">
+<p><strong>Asymmetric Intimacy"</strong></p>
+<p>Executive Producers:</p>
+<p>Stuart Greene</p>
+<p>Jessica Greene</p>
+<p>Sir Sala Hauser</p>
+<p>Sir Ty of God's Flat Earth</p>
+<p>Eric Wilka</p>
+<p>Dr. Sir OneAwesome Jason PhD.</p>
+<p>Tom Beben</p>
+<p>Katherine Nicholas</p>
+<p>Sir JoFo</p>
+<p>Peter Bickford</p>
+<p>Raymond Lee (switcheroo from Indy NA Meetup)</p>
+<p>Indy NA Meetup</p>
+<p>The Sydney No Agenda Meetup Mob &mdash; Sir Chris Wilson</p>
+<p>Associate Executive Producers:</p>
+<p>Manuka Gold Family &mdash; manukagold.com (code TREASURE)</p>
+<p>Eli The Coffee Guy &mdash; Gigawatt Coffee Roasters (code ITM20)</p>
+<p>Annette Miller (switcheroo from Indy NA Meetup)</p>
+<p>Indy NA Meetup</p>
+<p>Linda Lupatkin &mdash; Imagemakers Ink, Duchess of Jobs</p>
+<p>Knights and Dames:</p>
+<p>Stuart Greene &gt; Sir Troubleshooter</p>
+<p>Raymond Lee &gt; Sir Raymond</p>
+<p>Jessica Greene &gt; Dame Doula at your Cervix</p>
+<p>Annette Miller &gt; Dame Near Perfect</p>
+<p>Order of the Ant:</p>
+<p>Stuart Greene</p>
+<p>Jessica Greene</p>
+<p>Sir Sala Hauser</p>
+<p>Sir Ty of God's Flat Earth</p>
+<p>Eric Wilka</p>
+<p>Dr. Sir OneAwesome Jason PhD.</p>
+<p>Tom Beben</p>
+<p>Katherine Nicholas</p>
+<p>Sir JoFo</p>
+<p>Peter Bickford</p>
+<p>Raymond Lee</p>
+<p>End of Show Mixes:</p>
+<p>Jus Baker (Where's The Beef)</p>
+<p>Jus Baker (All-In Jason Calacanis)</p>
+<p>Jus Baker (The Biggest Oil Deal)</p>
+<p><a href="https://noagendaartgenerator.com/artist/tyler-brown" target="_blank" rel="noopener">Art By: Tyler Brown</a></p>
+<p>Mark van Dijk - Systems Master</p>
+<p>Ryan Bemrose - Program Director</p>
+<p>Back Office Jae Dvorak</p>
+<p>Chapters: Dreb Scott</p>
+<p>Clip Custodian: Neal Jones</p>
+<p>Clip Collectors: Steve Jones &amp; Dave Ackerman</p>
+<p><a href="http://dvorak.org/peerage.htm" target="_blank" rel="noopener">No Agenda Peerage</a></p>
+<p><a href="http://feed.nashownotes.com/rss.xml" target="_blank" rel="noopener">RSS Podcast Feed</a></p>
+</div>
+</div>
+</div>
+<div><small>Last Modified 08/30/2026 15:55:34 by&nbsp;<a href="http://freedomcontroller.com/">Freedom Controller</a></small>&nbsp;<a title="Link to the opml for this document." href="http://adam.curry.com/opml/NoAgendaEpisode1899A-g6fGXgCt8pK2BXHgcXKpjKqNkXSt0C.opml">&nbsp;</a></div>]]></itunes:summary>
+      <itunes:author><![CDATA[Adam Curry & John C. Dvorak]]></itunes:author>
+      <author><![CDATA[Adam Curry & John C. Dvorak]]></author>
+      <itunes:image href="https://noagendaassets.com/enc/1788123278.548_na-1899-art-feed.jpg"/>
+      <itunes:explicit>No</itunes:explicit>
+      <itunes:keywords>curry,dvorak,noagenda,no,agenda,politics,douchebag</itunes:keywords>
+      <enclosure url="https://op3.dev/e/mp3s.nashownotes.com/NA-1899-2026-08-30-Final.mp3" type="audio/mpeg" length="112644543"/>
+      <podcast:person href="http://curry.com/" img="https://pbs.twimg.com/profile_images/1401922551161442307/XjN2DdFD_400x400.jpg" group="cast" role="host">Adam Curry</podcast:person>
+      <podcast:person group="cast" role="guest host">Jason Calacanis</podcast:person>
+      <podcast:transcript url="https://mp3s.nashownotes.com/NA-1899-Captions.srt" type="application/srt" rel="captions"/>
+      <itunes:duration>9080</itunes:duration>
+      <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+        <podcast:valueRecipient name="No Agenda Show" type="lnaddress" address="no_agenda_show@strike.me" split="59"/>
+        <podcast:valueRecipient name="Dreb Scott (Chapter Architect)" type="node" address="02453e4e93322d60219808c00c2e6d1f1c673420e95b5511a33c40cfb4df5e9148" split="5"/>
+        <podcast:valueRecipient name="Sovereign Feeds" type="node" address="035ad2c954e264004986da2d9499e1732e5175e1dcef2453c921c6cdcc3536e9d8" split="5"/>
+        <podcast:valueRecipient name="AC" type="lnaddress" address="adamcurry@strike.me" split="5"/>
+        <podcast:valueRecipient name="Clip Collector Steve" type="lnaddress" address="babygreen973@walletofsatoshi.com" split="5"/>
+        <podcast:valueRecipient name="hiddenflower35@getalby.com" type="lnaddress" address="hiddenflower35@getalby.com" split="5"/>
+        <podcast:valueRecipient name="Reflex" type="lnaddress" address="reflex@livewire.io" split="5"/>
+        <podcast:valueRecipient name="darrenoneill@getalby.com" type="lnaddress" address="darrenoneill@getalby.com" split="5"/>
+        <podcast:valueRecipient name="aceackerman@fountain.fm" type="lnaddress" address="03b6f613e88bd874177c28c6ad83b3baba43c4c656f56be1f8df84669556054b79" split="5"/>
+        <podcast:valueRecipient name="Clip Custodian" type="lnaddress" address="clip_custodian@strike.me" split="1"/>
+      </podcast:value>
+    </item>
+    </channel>
+</rss>
