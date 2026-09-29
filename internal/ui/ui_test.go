@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +21,11 @@ import (
 // and no audio device.
 func newTestApp(t *testing.T) (*App, tcell.SimulationScreen) {
 	t.Helper()
+	// never reach the real Claude API or a real Anthropic login from tests
+	for _, k := range []string{"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"} {
+		t.Setenv(k, "")
+	}
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	cfg := config.Default()
 	cfg.CacheDir = t.TempDir()
 	cfg.LibraryPath = cfg.CacheDir + "/library.json"
@@ -44,6 +50,8 @@ func newTestApp(t *testing.T) (*App, tcell.SimulationScreen) {
 	scr.SetSize(120, 36)
 	a.scr = scr
 	a.dl = download.New(lib, cfg.DownloadDir, 1, nil)
+	a.canKitty = false
+	a.kittyOut = io.Discard
 	return a, scr
 }
 

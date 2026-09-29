@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"github.com/Cid-Emmerich/SopeBox/internal/config"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
 	"github.com/Cid-Emmerich/SopeBox/internal/feed"
+	"github.com/Cid-Emmerich/SopeBox/internal/mentions"
 	"github.com/Cid-Emmerich/SopeBox/internal/store"
 	"github.com/Cid-Emmerich/SopeBox/internal/theme"
 	"github.com/Cid-Emmerich/SopeBox/internal/transcript"
@@ -38,6 +40,9 @@ usage:
   sopebox play <words>            play the best matching episode
   sopebox download [podcast] [n]  download the n newest episodes (default 3)
   sopebox transcribe <words>      transcribe a downloaded episode with whisper.cpp
+  sopebox collage <words>         find who and what an episode mentions (Claude) and
+                                  fetch their pictures, ready for the collage style
+                                  (reuses what Claude found before; --fresh asks again)
   sopebox path <dir>              set the download folder
   sopebox config                  print the config file location
 
@@ -306,6 +311,9 @@ func command(cfg *config.Config, lib *store.Library, args []string) bool {
 		must(transcript.SaveCached(transcript.CachePath(cfg.CacheDir, target.Podcast.URL+"|"+target.Episode.GUID), t))
 		fmt.Printf("done: %d caption segments\n", len(t.Segments))
 		return true
+	case "collage":
+		collage(cfg, lib, rest)
+		return true
 	}
 	// unknown word: treat as "play <words>"
 	return false
@@ -355,4 +363,117 @@ func must(err error) {
 	if err != nil {
 		die(err)
 	}
+}
+
+// collage prepares an episode for the collage visualizer: transcript
+// (cached, from the feed, or whisper), then Claude, then pictures.
+func collage(cfg *config.Config, lib *store.Library, args []string) {
+	fresh := false
+	var words []string
+	for _, a := range args {
+		if a == "--fresh" {
+			fresh = true
+		} else {
+			words = append(words, a)
+		}
+	}
+	q := strings.ToLower(strings.Join(words, " "))
+	if q == "" {
+		die(fmt.Errorf("usage: sopebox collage <episode words>"))
+	}
+	var target *store.Item
+	for _, p := range lib.Sorted() {
+		for _, it := range lib.Items(p) {
+			if strings.Contains(strings.ToLower(p.Title+" "+it.Episode.Title), q) {
+				target = &it
+				break
+			}
+		}
+		if target != nil {
+			break
+		}
+	}
+	if target == nil {
+		die(fmt.Errorf("no episode matches %q", q))
+	}
+	it := *target
+	key := os.Getenv("ANTHROPIC_API_KEY")
+	if key == "" {
+		key = cfg.AnthropicKey
+	}
+	fmt.Println("episode:", it.Podcast.Title, "›", it.Episode.Title)
+	ck := it.Podcast.URL + "|" + it.Episode.GUID
+	tlPath := mentions.CachePath(cfg.CacheDir, ck)
+	cached, cacheErr := mentions.LoadCached(tlPath)
+	if (fresh || cacheErr != nil) && !mentions.HaveCredentials(key) {
+		die(fmt.Errorf("set ANTHROPIC_API_KEY (or anthropic_api_key in %s) first", cfg.ConfigPath))
+	}
+	trPath := transcript.CachePath(cfg.CacheDir, ck)
+	tr, err := transcript.LoadCached(trPath)
+	if err != nil || len(tr.Segments) == 0 {
+		if tr, err = transcript.FromFeed(it.Episode); err != nil {
+			if !it.Downloaded() {
+				die(fmt.Errorf("no transcript in the feed; download the episode first (sopebox download) so whisper can make one"))
+			}
+			fmt.Println("transcribing with whisper.cpp…")
+			tr, err = transcript.Transcribe(it.State.Path, transcript.Options{Bin: cfg.WhisperBin, Model: cfg.WhisperModel, CacheDir: cfg.CacheDir,
+				Progress: func(ph string, f float64) { fmt.Printf("\r%s %3d%%", ph, int(f*100)) }})
+			fmt.Println()
+			if err != nil {
+				die(err)
+			}
+		}
+		must(transcript.SaveCached(trPath, tr))
+	}
+	fmt.Printf("transcript: %s, %d lines\n", tr.Source, len(tr.Segments))
+	if !fresh && cacheErr == nil {
+		cached.Rebuild(tr)
+		must(mentions.SaveCached(tlPath, cached))
+		fmt.Printf("reusing what %s found before (no charge; --fresh asks again): %d mentions of %d people, places and things\n",
+			cached.Model, len(cached.Mentions), cached.Distinct())
+		printTimeline(cached)
+		prefetch(cfg, cached)
+		return
+	}
+	fmt.Printf("asking %s who and what is mentioned…\n", cfg.CollageModel)
+	start := time.Now()
+	info := mentions.Episode{Podcast: it.Podcast.Title, Title: it.Episode.Title, Description: it.Episode.Description}
+	for _, p := range append(it.Episode.Persons, it.Podcast.Persons...) {
+		info.Hosts = append(info.Hosts, p.Name)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	tl, err := mentions.Extract(ctx, key, cfg.CollageModel, info, tr)
+	if err != nil {
+		die(err)
+	}
+	must(mentions.SaveCached(tlPath, tl))
+	fmt.Printf("%d mentions of %d people, places and things in %s (%d tokens in, %d out)\n",
+		len(tl.Mentions), tl.Distinct(), time.Since(start).Round(time.Second), tl.InputTokens, tl.OutputTokens)
+	printTimeline(tl)
+	prefetch(cfg, tl)
+}
+
+func printTimeline(tl *mentions.Timeline) {
+	for _, m := range tl.Mentions {
+		wiki := m.Wiki
+		if wiki == "" {
+			wiki = "—"
+		}
+		fmt.Printf("  %8s  %-7s %-34s %s\n", fmtClock(m.At), m.Kind, fitStr(m.Name, 34), wiki)
+	}
+}
+
+func prefetch(cfg *config.Config, tl *mentions.Timeline) {
+	fmt.Println("fetching pictures from Wikipedia…")
+	found, pics := mentions.Prefetch(cfg.CacheDir, tl, nil)
+	fmt.Printf("done: %d articles, %d pictures. Play it and press v until the style is collage.\n", found, pics)
+}
+
+func fmtClock(s float64) string {
+	t := int(s)
+	if t >= 3600 {
+		return fmt.Sprintf("%d:%02d:%02d", t/3600, t/60%60, t%60)
+	}
+	return fmt.Sprintf("%d:%02d", t/60, t%60)
 }

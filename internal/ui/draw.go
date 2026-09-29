@@ -89,6 +89,7 @@ func (a *App) draw() {
 	if w < 40 || h < 10 {
 		a.puts(0, 0, "window too small", a.st(a.th.Warn), w)
 		a.scr.Show()
+		a.kt.hide(a.kittyOut)
 		return
 	}
 	a.drawHeader(w)
@@ -115,6 +116,7 @@ func (a *App) draw() {
 	}
 	a.scr.Show()
 	a.drawKitty(w, h)
+	a.drawCollageKitty()
 }
 
 // tabPositions returns [start,end) x ranges of the header tabs.

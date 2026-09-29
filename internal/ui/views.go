@@ -2,12 +2,14 @@ package ui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/Cid-Emmerich/SopeBox/internal/art"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
+	"github.com/Cid-Emmerich/SopeBox/internal/mentions"
 	"github.com/Cid-Emmerich/SopeBox/internal/transcript"
 	"github.com/Cid-Emmerich/SopeBox/internal/vis"
 )
@@ -318,6 +320,28 @@ func (a *App) settings() []setting {
 		{"auto transcribe", func() string { return c.AutoTranscribe }, func(d int) {
 			c.AutoTranscribe = cycleStr(c.AutoTranscribe, []string{"off", "downloaded", "always"}, d)
 		}, "run whisper automatically when an episode without a feed transcript starts"},
+		{"collage model", func() string { return c.CollageModel }, func(d int) { c.CollageModel = cycleStr(c.CollageModel, CollageModels, d) },
+			"the Claude model that reads transcripts for the collage: opus is best at telling who is meant, haiku is cheapest"},
+		{"collage pictures", func() string {
+			if c.CollageImages == "kitty" && !a.canKitty {
+				return "kitty (not supported here: blocks)"
+			}
+			return c.CollageImages
+		}, func(d int) {
+			c.CollageImages = cycleStr(c.CollageImages, []string{"kitty", "blocks"}, d)
+			a.kt.hide(a.kittyOut)
+		}, "kitty = real pictures in Ghostty/Kitty/WezTerm, blocks = coloured half blocks anywhere"},
+		{"Claude API key", func() string {
+			switch {
+			case os.Getenv("ANTHROPIC_API_KEY") != "":
+				return "from ANTHROPIC_API_KEY"
+			case c.AnthropicKey != "":
+				return "set in " + c.ConfigPath
+			case mentions.HaveCredentials(""):
+				return "from your Anthropic login"
+			}
+			return "not set"
+		}, func(d int) {}, "set ANTHROPIC_API_KEY, or add anthropic_api_key = … to the config file"},
 		{"whisper.cpp", func() string {
 			if p := transcript.FindWhisper(c.WhisperBin); p != "" {
 				return p

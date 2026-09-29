@@ -63,7 +63,7 @@ one), press **i** on it to search iTunes for its artwork, exactly like
 
 ## The voice visualizer
 
-The now-playing screen is the point of the app. Eight styles, cycled with
+The now-playing screen is the point of the app. Nine styles, cycled with
 **v**:
 
 | style | what it does |
@@ -76,6 +76,7 @@ The now-playing screen is the point of the app. Eight styles, cycled with
 | `pulse` | a single breathing orb that changes colour with the speaker |
 | `talktime` | a living donut of each person's share of the talking |
 | `bars` | the classic analyser, tinted by whoever is speaking |
+| `collage` | pictures of the people, places and events being talked about, as they come up ([below](#the-collage)) |
 
 ### How voices are told apart
 
@@ -118,6 +119,60 @@ rotation, **e/E** orb size, **,/.** smoothing, **[/]** gain, **;/'** falloff,
 **L** speaker names, **R** reset. **t/T** cycle fourteen colour themes; the
 `match` theme takes its colours from the podcast's icon. Every orb has its own
 colour from the theme's voice palette.
+
+## The collage
+
+The `collage` style is for shows like *The Rest Is History*. When someone
+mentions Tewodros II, the Battle of Magdala or Queen Victoria, their picture
+appears on screen. The newest mention is shown large, the four before it sit
+alongside, and each has Wikipedia's one-line description underneath.
+
+How it works:
+
+1. **Transcript.** It needs the episode's words ahead of time: from the feed,
+   or made locally with whisper.cpp from a downloaded episode (this starts
+   automatically when you switch to the collage).
+2. **Claude reads it once.** The whole transcript goes to Claude in one
+   request. Claude returns every person, place, event and thing, when it is
+   first mentioned, which Wikipedia article it is, and what else it is called. Claude fixes names
+   whisper got wrong ("Teodros" → Tewodros II) and works out who is meant
+   ("Henry" in a Tudor episode → Henry VIII). The result is cached, so seeking
+   and replaying cost nothing.
+3. **Wikipedia pictures.** Each article's main image and description are
+   fetched ahead of the moment they are needed, and cached.
+
+In Ghostty, Kitty and WezTerm the pictures are real images (the Kitty
+graphics protocol). Elsewhere, or with *collage pictures* set to `blocks`,
+they are drawn in coloured half blocks.
+
+**Setup:** it needs a Claude API key. Create one at
+[console.anthropic.com](https://console.anthropic.com), then either export it:
+
+```sh
+export ANTHROPIC_API_KEY=sk-ant-…
+```
+
+or add `anthropic_api_key = sk-ant-…` to `~/.config/sopebox/sopeboxrc` (the
+file is written owner-only). The model is set under Settings → *collage
+model*. The default, `claude-opus-5-5`, is best at working out who is meant
+and costs roughly 15–25¢ for an hour-long episode. `claude-haiku-4-5` costs
+about a tenth of that.
+
+| key | where | what |
+|---|---|---|
+| `v` | now playing | cycle to the `collage` style |
+| `P` | now playing | ask Claude again for this episode (e.g. after changing model) |
+| `P` | podcast list | **collage prep** for a show: its newest downloads are transcribed, read by Claude and have their pictures fetched in the background, so they are ready when you press play |
+
+From the shell, `sopebox collage <episode words>` does the same for one
+episode and prints the timeline it found. Run it again and it reuses what
+Claude found the first time, at no charge; add `--fresh` to ask Claude again.
+
+Claude lists each entity once, along with the other ways it is referred to
+("Teodros", "Theodore", "the emperor"). SopeBox then searches the
+transcript for those names, so when the conversation returns to someone
+after three minutes or more, their picture comes back to the front. A
+first name shared by several people ("Henry") is never used on its own.
 
 ## Captions and animated emoji
 

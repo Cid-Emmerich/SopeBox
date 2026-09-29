@@ -76,6 +76,11 @@ type Config struct {
 	WhisperModel   string // "tiny.en", "base.en", "small.en", ...
 	AutoTranscribe string // "off", "downloaded", "always"
 
+	// Collage (pictures of who and what is mentioned)
+	CollageModel  string // Claude model that reads transcripts
+	CollageImages string // "kitty" (real pictures) or "blocks"
+	AnthropicKey  string // API key; ANTHROPIC_API_KEY in the environment wins
+
 	// Paths
 	LibraryPath string
 	CacheDir    string
@@ -127,6 +132,8 @@ func Default() Config {
 		WhisperBin:       "",
 		WhisperModel:     "base.en",
 		AutoTranscribe:   "off",
+		CollageModel:     "claude-opus-5-5",
+		CollageImages:    "kitty",
 		LibraryPath:      filepath.Join(dataDir(), "library.json"),
 		CacheDir:         cacheDir(),
 		ConfigPath:       filepath.Join(configDir(), "sopeboxrc"),
@@ -281,6 +288,12 @@ func (c *Config) Set(k, v string) {
 		c.WhisperModel = v
 	case "auto_transcribe":
 		c.AutoTranscribe = v
+	case "collage_model":
+		c.CollageModel = v
+	case "collage_images":
+		c.CollageImages = v
+	case "anthropic_api_key":
+		c.AnthropicKey = v
 	}
 }
 
@@ -342,6 +355,11 @@ func (c Config) Save() error {
 		"whisper_bin":       c.WhisperBin,
 		"whisper_model":     c.WhisperModel,
 		"auto_transcribe":   c.AutoTranscribe,
+		"collage_model":     c.CollageModel,
+		"collage_images":    c.CollageImages,
+	}
+	if c.AnthropicKey != "" {
+		kv["anthropic_api_key"] = c.AnthropicKey
 	}
 	keys := make([]string, 0, len(kv))
 	for k := range kv {
@@ -355,5 +373,10 @@ func (c Config) Save() error {
 	for _, k := range keys {
 		fmt.Fprintf(&sb, "%s = %s\n", k, kv[k])
 	}
-	return os.WriteFile(c.ConfigPath, []byte(sb.String()), 0o644)
+	// owner-only: the file may hold an API key (WriteFile keeps the mode
+	// of an existing file, so set it explicitly)
+	if err := os.WriteFile(c.ConfigPath, []byte(sb.String()), 0o600); err != nil {
+		return err
+	}
+	return os.Chmod(c.ConfigPath, 0o600)
 }

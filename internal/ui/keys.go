@@ -530,6 +530,8 @@ func (a *App) nowKey(r rune) {
 			a.loadTranscript(*a.cur, true)
 			a.showToast("reloading captions", false)
 		}
+	case 'P':
+		a.redoMentions()
 	}
 }
 
@@ -718,6 +720,10 @@ func (a *App) podcastsKey(r rune) {
 				a.dl.Apply(download.Policy{Latest: a.cfg.AutoDownload, KeepLatest: a.cfg.KeepLatest})
 			}
 		}
+	case 'P':
+		if p := v.selectedPodcast(a); p != nil {
+			a.toggleCollagePrep(p)
+		}
 	case 'x':
 		if p := v.selectedPodcast(a); p != nil && v.focus == 0 && v.mode == 0 {
 			a.startPrompt("unsubscribe from "+p.Title+"?", "", "type yes to confirm", func(s string) {
@@ -871,6 +877,17 @@ func (a *App) cycleVis(d int) {
 	a.visIdx = (a.visIdx + d + len(vis.Registry)) % len(vis.Registry)
 	v := vis.Registry[a.visIdx]
 	a.showToast("visualizer: "+v.Name()+" — "+v.Describe(), false)
+	if a.collageOn() {
+		a.ensureMentions()
+	}
+}
+
+// setVis switches to a visualizer by name.
+func (a *App) setVis(name string) {
+	a.visIdx = vis.Index(name)
+	if a.collageOn() {
+		a.ensureMentions()
+	}
 }
 
 // --- mouse -------------------------------------------------------------------

@@ -3,6 +3,7 @@ package ui
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/Cid-Emmerich/SopeBox/internal/captions"
 	"github.com/Cid-Emmerich/SopeBox/internal/config"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
+	"github.com/Cid-Emmerich/SopeBox/internal/mentions"
 	"github.com/Cid-Emmerich/SopeBox/internal/paint"
 	"github.com/Cid-Emmerich/SopeBox/internal/store"
 	"github.com/Cid-Emmerich/SopeBox/internal/theme"
@@ -130,6 +132,27 @@ type App struct {
 	trProgress string
 	trBusy     map[store.Key]bool
 
+	// collage
+	tl            *mentions.Timeline
+	tlStatus      string // "", "loading", "waiting", "extracting", "ok", "failed", "nokey"
+	tlErr         string
+	tlBusy        map[store.Key]bool
+	tlCheck       time.Time
+	trAuto        bool // whisper was started for the collage
+	wiki          map[string]*wikiItem
+	wikiQueue     []string
+	wikiInFlight  int
+	collage       vis.Collage
+	collageOrigin [2]int
+	canKitty      bool
+	kittyOut      io.Writer
+	kt            kittyTiles
+	prepBusy      bool
+	prepKey       store.Key
+	prepTitle     string
+	prepPhase     string
+	prepDone      map[store.Key]bool
+
 	// playback
 	cur        *store.Item
 	lastSave   time.Time
@@ -183,6 +206,11 @@ func New(cfg *config.Config, lib *store.Library, pl *audio.Player) *App {
 		iconBusy:   map[string]bool{},
 		cellCache:  map[string][][]paint.Cell{},
 		trBusy:     map[store.Key]bool{},
+		tlBusy:     map[store.Key]bool{},
+		wiki:       map[string]*wikiItem{},
+		prepDone:   map[store.Key]bool{},
+		canKitty:   art.KittySupported(),
+		kittyOut:   os.Stdout,
 		kittyID:    int(time.Now().UnixNano()%9000) + 100,
 		lastSeg:    -1,
 		lastWord:   -1,
@@ -193,6 +221,7 @@ func New(cfg *config.Config, lib *store.Library, pl *audio.Player) *App {
 	if cfg.IconMode == "kitty" && !art.KittySupported() {
 		cfg.IconMode = "blocks"
 	}
+	a.kt = newKittyTiles(a.kittyID + 10000)
 	a.pv.init(a)
 	a.sv.init()
 	return a
@@ -273,6 +302,7 @@ func (a *App) RunWith(scr tcell.Screen, startView View) error {
 			a.load(*it, true)
 		}
 	}
+	a.prepTick()
 
 	fps := a.cfg.VisFPS
 	if fps < 5 {
@@ -297,6 +327,7 @@ func (a *App) RunWith(scr tcell.Screen, startView View) error {
 		case <-ticker.C:
 			a.tick()
 		case <-saver.C:
+			a.prepTick()
 			a.savePosition()
 			go a.lib.Save() // marshalling a big library off the UI thread
 		}
@@ -306,6 +337,7 @@ func (a *App) RunWith(scr tcell.Screen, startView View) error {
 		a.draw()
 	}
 	a.kittyClear()
+	a.kt.forget(a.kittyOut)
 	scr.Fini()
 	a.shutdown()
 	return nil
@@ -348,6 +380,7 @@ func (a *App) handle(ev tcell.Event) {
 	case *tcell.EventResize:
 		a.scr.Sync()
 		a.kittyClear()
+		a.kt.hide(a.kittyOut)
 		a.cellCache = map[string][][]paint.Cell{}
 	case *tcell.EventKey:
 		a.handleKey(e)
@@ -371,6 +404,15 @@ func (a *App) handle(ev tcell.Event) {
 			if a.cur != nil && d.key == a.cur.Key() {
 				a.trProgress = fmt.Sprintf("%s %d%%", d.phase, int(d.frac*100))
 			}
+			if a.prepBusy && d.key == a.prepKey {
+				a.prepPhase = fmt.Sprintf("whisper %s %d%%", d.phase, int(d.frac*100))
+			}
+		case mentionsEvent:
+			a.onMentions(d)
+		case wikiEvent:
+			a.onWiki(d)
+		case prepEvent:
+			a.onPrep(d)
 		case refreshEvent:
 			if d.done {
 				a.refreshing = false
@@ -387,6 +429,7 @@ func (a *App) handle(ev tcell.Event) {
 					}
 				}
 				_ = a.lib.Save()
+				a.prepTick()
 			}
 		case searchEvent:
 			a.sv.busy = false
@@ -517,6 +560,10 @@ func (a *App) load(it store.Item, pausedStart bool) {
 	a.tr, a.chapters = nil, nil
 	a.trStatus = "loading"
 	a.trProgress = ""
+	a.tl = nil
+	a.tlStatus, a.tlErr = "", ""
+	a.trAuto = false
+	a.kt.forget(a.kittyOut)
 	start := st.Position
 	if it.Episode.Duration > 0 && start > it.Episode.Duration-20 {
 		start = 0
@@ -528,6 +575,7 @@ func (a *App) load(it store.Item, pausedStart bool) {
 	}
 	a.requestIcon(it.Podcast, false)
 	a.loadTranscript(it, false)
+	a.ensureMentions()
 	if it.Episode.Chapters != "" {
 		go func(k store.Key, u string) {
 			ch, err := transcript.FetchChapters(u)
@@ -694,6 +742,7 @@ func (a *App) onTranscript(e transcriptEvent) {
 		} else {
 			a.showToast("captions loaded ("+e.tr.Source+")", false)
 		}
+		a.ensureMentions()
 		return
 	}
 	a.trStatus = "none"
@@ -705,6 +754,7 @@ func (a *App) onTranscript(e transcriptEvent) {
 	if a.cfg.AutoTranscribe == "always" || (a.cfg.AutoTranscribe == "downloaded" && a.cur.Downloaded()) {
 		a.transcribe()
 	}
+	a.ensureMentions()
 }
 
 // transcribe runs whisper.cpp on the current episode in the background.

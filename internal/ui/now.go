@@ -108,6 +108,10 @@ func (a *App) drawVisualizer(x0, top, cw, ch int, st audio.Status) {
 		Words:    a.words,
 		Level:    a.level,
 	}
+	if a.collageOn() {
+		f.Collage = a.buildCollage(st.Position)
+		a.collageOrigin = [2]int{x0, top + 1}
+	}
 	vis.Registry[a.visIdx].Draw(a.canvas, f)
 	a.blit(a.canvas.Cells, cw, vh, x0, top+1, a.th.Text)
 

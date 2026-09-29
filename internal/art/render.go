@@ -126,10 +126,36 @@ func KittySupported() bool {
 // KittyImage encodes the image as a Kitty graphics protocol sequence that
 // paints it at the current cursor position, sized to cols x rows cells.
 func KittyImage(img image.Image, cols, rows int, id int) string {
+	return kittySend(img, fmt.Sprintf("f=100,a=T,i=%d,q=2,c=%d,r=%d", id, cols, rows))
+}
+
+// KittyTransmit uploads an image under an id without showing it; place it
+// afterwards (as often as needed) with KittyPlace.
+func KittyTransmit(img image.Image, id int) string {
+	return kittySend(img, fmt.Sprintf("f=100,a=t,i=%d,q=2", id))
+}
+
+// KittyPlace shows an uploaded image at the cursor, stretched over cols x
+// rows cells, without moving the cursor. Placing it again moves it.
+func KittyPlace(id, cols, rows int) string {
+	return fmt.Sprintf("\x1b_Ga=p,i=%d,p=1,c=%d,r=%d,C=1,q=2\x1b\\", id, cols, rows)
+}
+
+// KittyUnplace hides an uploaded image but keeps it for placing again.
+func KittyUnplace(id int) string {
+	return fmt.Sprintf("\x1b_Ga=d,d=i,i=%d,q=2\x1b\\", id)
+}
+
+// kittySend encodes img as PNG and wraps it in (chunked) graphics commands.
+func kittySend(img image.Image, keys string) string {
 	var buf bytes.Buffer
 	b := img.Bounds()
 	if b.Dx() > 800 || b.Dy() > 800 {
-		img = scale(img, 800, 800*b.Dy()/b.Dx())
+		if b.Dx() >= b.Dy() {
+			img = scale(img, 800, 800*b.Dy()/b.Dx())
+		} else {
+			img = scale(img, 800*b.Dx()/b.Dy(), 800)
+		}
 	}
 	if err := png.Encode(&buf, img); err != nil {
 		return ""
@@ -148,7 +174,7 @@ func KittyImage(img image.Image, cols, rows int, id int) string {
 			more = 1
 		}
 		if first {
-			fmt.Fprintf(&sb, "\x1b_Gf=100,a=T,i=%d,q=2,c=%d,r=%d,m=%d;%s\x1b\\", id, cols, rows, more, data[:n])
+			fmt.Fprintf(&sb, "\x1b_G%s,m=%d;%s\x1b\\", keys, more, data[:n])
 			first = false
 		} else {
 			fmt.Fprintf(&sb, "\x1b_Gm=%d;%s\x1b\\", more, data[:n])
