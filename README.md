@@ -81,7 +81,7 @@ The now-playing screen is the point of the app. Nine styles, cycled with
 ### How voices are told apart
 
 SopeBox has two ways to know who is talking, chosen by the **voice mode**
-(**M**, or in Settings):
+(Settings → *voice isolation mode*):
 
 - **transcript** — if the episode has a transcript with speaker labels
   (Podcasting 2.0 `<podcast:transcript>` JSON/VTT/SRT/HTML files, like No
@@ -95,28 +95,31 @@ SopeBox has two ways to know who is talking, chosen by the **voice mode**
 - **auto** (default) uses the transcript when it has speakers, else listens.
 
 Three knobs shape the acoustic isolation, mirroring wvfrm's
-smoothing/sensitivity/falloff:
+smoothing/sensitivity/falloff. Sensitivity is also on `{` / `}` in the
+now-playing view; all three are in Settings → *Voices*:
 
-| key | setting | effect |
-|---|---|---|
-| `{` / `}` | **sensitivity** | lower merges similar voices into one orb; higher splits eagerly into more orbs |
-| `(` / `)` | **smoothing** | how much each voice fingerprint is averaged over time |
-| `<` / `>` | **falloff** | how quickly an orb dims after its speaker stops |
+| setting | effect |
+|---|---|
+| **sensitivity** | lower merges similar voices into one orb; higher splits eagerly into more orbs |
+| **smoothing** | how much each voice fingerprint is averaged over time |
+| **falloff** | how quickly an orb dims after its speaker stops |
 
 Voices are **remembered per podcast**: when you quit (or the episode changes)
 the fingerprints of anyone who spoke for more than 15 seconds are saved with
 the show, so the same hosts get the same orbs next episode. Press **N** to type
-a name for the voice that is speaking, or **B** to pick one from the people the
-feed declares (`<podcast:person>`). **K** merges the current voice into the
-previous one when the tracker split one person in two; **X** clears this
-episode's voices; **F** forgets everything learned for the show.
+a name for the voice that is speaking. The rest are actions in Settings →
+*Voices*: *name voice from feed* picks a name from the people the feed
+declares (`<podcast:person>`), *merge voice* joins the current voice to the
+previous one when the tracker split one person in two, *clear episode voices*
+starts this episode over, and *forget podcast voices* forgets everything
+learned for the show.
 
 ### Tuning the look
 
-The wvfrm tuning keys are all here: **g/G** gradient, **i** orb fill (braille,
-dots, rings, petals, ascii, block), **x** peak dots, **p** orb physics, **w/W**
-rotation, **e/E** orb size, **,/.** smoothing, **[/]** gain, **;/'** falloff,
-**L** speaker names, **R** reset. **t/T** cycle fourteen colour themes; the
+The wvfrm tuning knobs are all in Settings → *Visualizer*: gradient, orb fill
+(braille, dots, rings, petals, ascii, block), peak dots, mirror, orb physics,
+rotation, orb size, smoothing, gain, falloff, speaker names and *reset tuning*.
+**t** cycles fourteen colour themes; the
 `match` theme takes its colours from the podcast's icon. Every orb has its own
 colour from the theme's voice palette.
 
@@ -161,7 +164,7 @@ about a tenth of that.
 | key | where | what |
 |---|---|---|
 | `v` | now playing | cycle to the `collage` style |
-| `P` | now playing | ask Claude again for this episode (e.g. after changing model) |
+| enter | Settings → *ask Claude again* | read this episode again (e.g. after changing model) |
 | `P` | podcast list | **collage prep** for a show: its newest downloads are transcribed, read by Claude and have their pictures fetched in the background, so they are ready when you press play |
 
 From the shell, `sopebox collage <episode words>` does the same for one
@@ -176,8 +179,8 @@ first name shared by several people ("Henry") is never used on its own.
 
 ## Captions and animated emoji
 
-The captions pane (right side by default; **C** moves it to the bottom, **u/U**
-resize it, **c** hides it) shows the current line with the spoken word lit,
+The captions pane (right side by default; **c** hides it, and Settings →
+*Captions* moves it to the bottom or resizes it) shows the current line with the spoken word lit,
 recent lines above, the next line below, and chapter markers from
 `<podcast:chapters>` (they also appear as ticks on the progress bar).
 
@@ -185,9 +188,9 @@ Whenever a spoken word matches one of ~550 trigger words, the corresponding
 one of G1yph's 100 hand-drawn animated glyphs plays at the top of the pane:
 *coffee*, *fire*, *rocket*, *laughing*, *love*, *cat*, *idea*, *rain*, *America*,
 *billion*, and so on. Sound cues from transcripts work too (`[laughter]`,
-`[music]`, `[applause]`), and a question gets a raised hand. **j** toggles
-the emoji, **J** picks the render style (blocks, braille, ascii, chunky) and
-**k** the colouring.
+`[music]`, `[applause]`), and a question gets a raised hand. Settings →
+*Captions* turns the emoji on or off and picks the render style (blocks,
+braille, ascii, chunky) and the colouring.
 
 ### Where transcripts come from
 
@@ -207,9 +210,9 @@ tracker still separates the voices. The `small.en-tdrz` model adds speaker
 
 The **Podcasts** view is castero's layout: shows on the left (with a tiny
 icon each), episodes on the right, details underneath with the show's
-artwork. **l** cycles the episode list between *this podcast*, *all recent
-episodes* and *downloaded*. **/** filters by words. **enter** plays
-(streaming, or from disk if downloaded), **e** queues, **E** plays next,
+artwork. Settings → *podcast list shows* switches the episode list between
+*this podcast*, *all recent episodes* and *downloaded*. **/** filters by
+words. **enter** plays (streaming, or from disk if downloaded), **e** queues,
 **d** downloads, **D** deletes a download, **m** marks played.
 
 **Downloads** run in the background (2 at a time by default) into
@@ -218,12 +221,21 @@ have SopeBox keep the **1, 3, 5 or 10 most recent episodes** of every show
 downloaded automatically (Settings → *auto-download latest*), override it per
 show with **A** in the podcast list, and optionally have old automatic
 downloads removed (*keep only latest*). The policy runs after every feed
-refresh; press **a** in the Downloads view to apply it now.
+refresh; Settings → *apply auto-download now* runs it straight away.
 
 Playback remembers where you were in every episode, resumes the last episode
-on start, and continues with the queue when an episode ends. **s/S** change
-speed with pitch preserved; **←/→** skip 10 s back / 30 s forward (shift for
-4×).
+on start, and continues with the queue when an episode ends. **←/→** skip
+10 s back / 30 s forward (shift for 4×) and **↑/↓** change the volume.
+Speed (pitch preserved), mute and next / previous episode are in Settings →
+*Playback*.
+
+## Keys
+
+Only the keys shown at the bottom of each view are bound, so there is little
+to remember: press **ctrl+k** for the list. Everywhere: **space** play/pause,
+**1–6** or **tab** switch views, **esc** back to now playing, **q** quit.
+Every other option and action is a row in **Settings (6)**: **↑/↓** choose,
+**←/→** change, **enter** changes it or runs an action.
 
 ## Command line
 

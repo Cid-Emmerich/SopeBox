@@ -137,7 +137,7 @@ func TestCollageStatusMessages(t *testing.T) {
 	}
 	a.tlStatus, a.tlErr = "failed", "HTTP 529 overloaded"
 	a.draw()
-	if out := dump(scr); !strings.Contains(out, "HTTP 529 overloaded") || !strings.Contains(out, "press P") {
+	if out := dump(scr); !strings.Contains(out, "HTTP 529 overloaded") || !strings.Contains(out, "ask Claude again") {
 		t.Errorf("failure message:\n%s", out)
 	}
 }
@@ -211,9 +211,8 @@ func TestCollagePrepToggle(t *testing.T) {
 	if p.Collage {
 		t.Fatal("second toggle should turn it off")
 	}
-	// P in the now-playing view with nothing playing must not panic
-	a.view = ViewNow
-	a.handleKey(tcell.NewEventKey(tcell.KeyRune, 'P', 0))
+	// asking Claude again with nothing playing must not panic
+	a.redoMentions()
 	if vis.Registry[a.visIdx].Name() == "" {
 		t.Fatal("unreachable")
 	}

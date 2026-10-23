@@ -8,8 +8,11 @@ import (
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/Cid-Emmerich/SopeBox/internal/art"
+	"github.com/Cid-Emmerich/SopeBox/internal/captions"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
+	"github.com/Cid-Emmerich/SopeBox/internal/glyph"
 	"github.com/Cid-Emmerich/SopeBox/internal/mentions"
+	"github.com/Cid-Emmerich/SopeBox/internal/store"
 	"github.com/Cid-Emmerich/SopeBox/internal/transcript"
 	"github.com/Cid-Emmerich/SopeBox/internal/vis"
 )
@@ -27,7 +30,7 @@ func (a *App) drawQueue(w, h int) {
 		return
 	}
 	if len(items) == 0 {
-		a.puts(2, top+2, "the queue is empty — press e on an episode to add it, E to play it next", a.st(a.th.Muted), w-4)
+		a.puts(2, top+2, "the queue is empty — press e on an episode to add it", a.st(a.th.Muted), w-4)
 		return
 	}
 	if a.qCursor >= len(items) {
@@ -77,10 +80,10 @@ func (a *App) drawDownloads(w, h int) {
 		return
 	}
 	if len(jobs) == 0 {
-		a.puts(2, top+2, "no downloads yet — press d on an episode, or set auto-download in settings", a.st(a.th.Muted), w-4)
+		a.puts(2, top+2, "no downloads yet — press d on an episode, or set auto-download in settings (6)", a.st(a.th.Muted), w-4)
 		a.puts(2, top+3, "downloads go to "+a.cfg.DownloadDir, a.st(a.th.Muted), w-4)
 		n := len(a.lib.DownloadedItems())
-		a.puts(2, top+5, fmt.Sprintf("%d episodes are on disk (press l in podcasts to list them)", n), a.st(a.th.Muted), w-4)
+		a.puts(2, top+5, fmt.Sprintf("%d episodes are on disk (settings → podcast list shows: downloaded)", n), a.st(a.th.Muted), w-4)
 		return
 	}
 	if a.dCursor >= len(jobs) {
@@ -222,11 +225,45 @@ func (a *App) runSearch() {
 // ---------------------------------------------------------------------------
 // Settings
 
+// setting is one row of the Settings view. A row with only a name is a
+// section header; a row with run is an action that enter performs.
 type setting struct {
 	name  string
 	value func() string
 	cycle func(dir int)
 	help  string
+	run   func()
+}
+
+func section(name string) setting { return setting{name: name} }
+
+func action(name, help string, run func()) setting {
+	return setting{name: name, value: func() string { return "enter ↵" }, help: help, run: run}
+}
+
+func (s setting) header() bool { return s.value == nil }
+
+// settingStep moves the settings cursor by d, stepping over section headers.
+func settingStep(items []setting, cur, d int) int {
+	if len(items) == 0 {
+		return 0
+	}
+	dir := 1
+	if d < 0 {
+		dir = -1
+	}
+	next := clampi(cur+d, 0, len(items)-1)
+	for next >= 0 && next < len(items) && items[next].header() {
+		next += dir
+	}
+	if next < 0 || next >= len(items) {
+		// ran off an end: settle on the nearest real row the other way
+		next = clampi(cur+d, 0, len(items)-1)
+		for next >= 0 && next < len(items) && items[next].header() {
+			next -= dir
+		}
+	}
+	return clampi(next, 0, len(items)-1)
 }
 
 func cycleInt(cur int, choices []int, dir int) int {
@@ -260,68 +297,132 @@ func onOff(b bool) string {
 
 func (a *App) settings() []setting {
 	c := a.cfg
+	o := &a.visOpts
+	vo := &a.tracker.Opts
+	playingPodcast := func() *store.Podcast {
+		if a.cur == nil {
+			return nil
+		}
+		return a.cur.Podcast
+	}
 	return []setting{
+		section("Playback"),
+		{"speed", func() string { return fmt.Sprintf("%.2fx", a.pl.Status().Speed) }, func(d int) {
+			a.pl.SpeedDelta(0.1 * float64(d))
+		}, "pitch is preserved", nil},
+		{"volume", func() string { return fmt.Sprintf("%.0f%%", a.pl.Status().Volume*100) }, func(d int) {
+			a.pl.VolumeDelta(0.05 * float64(d))
+		}, "↑ ↓ in now playing", nil},
+		{"mute", func() string { return onOff(a.pl.Status().Muted) }, func(d int) { a.pl.ToggleMute() }, "", nil},
+		{"skip forward", func() string { return fmt.Sprintf("%ds", c.SkipFwd) }, func(d int) { c.SkipFwd = cycleInt(c.SkipFwd, []int{10, 15, 30, 45, 60}, d) }, "→ key (shift: 4x further)", nil},
+		{"skip back", func() string { return fmt.Sprintf("%ds", c.SkipBack) }, func(d int) { c.SkipBack = cycleInt(c.SkipBack, []int{5, 10, 15, 30}, d) }, "← key (shift: 4x further)", nil},
+		{"continue with queue", func() string { return onOff(c.Continue) }, func(d int) { c.Continue = !c.Continue }, "play the next queued episode when one ends", nil},
+		action("next episode", "play the next episode in the queue", a.playNext),
+		action("previous episode", "restart this episode, or play the one before it in the queue", a.playPrev),
+
+		section("Downloads"),
 		{"auto-download latest", func() string {
 			if c.AutoDownload == 0 {
 				return "off"
 			}
 			return fmt.Sprintf("%d most recent per podcast", c.AutoDownload)
-		}, func(d int) { c.AutoDownload = cycleInt(c.AutoDownload, download.Choices, d) }, "like Apple Podcasts: keep the newest episodes of every show on disk (per-podcast override with A in the podcast list)"},
+		}, func(d int) { c.AutoDownload = cycleInt(c.AutoDownload, download.Choices, d) }, "like Apple Podcasts: keep the newest episodes of every show on disk (per-podcast override with A in the podcast list)", nil},
 		{"keep only latest", func() string {
 			if c.KeepLatest == 0 {
 				return "keep everything"
 			}
 			return fmt.Sprintf("%d auto-downloads per podcast", c.KeepLatest)
-		}, func(d int) { c.KeepLatest = cycleInt(c.KeepLatest, []int{0, 3, 5, 10, 25}, d) }, "delete older automatic downloads (manual downloads are never removed)"},
+		}, func(d int) { c.KeepLatest = cycleInt(c.KeepLatest, []int{0, 3, 5, 10, 25}, d) }, "delete older automatic downloads (manual downloads are never removed)", nil},
 		{"parallel downloads", func() string { return fmt.Sprint(c.Concurrency) }, func(d int) {
 			c.Concurrency = cycleInt(c.Concurrency, []int{1, 2, 3, 4}, d)
 			a.dl.SetConcurrency(c.Concurrency)
-		}, ""},
-		{"download folder", func() string { return c.DownloadDir }, func(d int) {}, "change with: sopebox path <dir>"},
-		{"refresh feeds on start", func() string { return onOff(c.RefreshStart) }, func(d int) { c.RefreshStart = !c.RefreshStart }, ""},
-		{"continue with queue", func() string { return onOff(c.Continue) }, func(d int) { c.Continue = !c.Continue }, "play the next queued episode when one ends"},
-		{"skip forward", func() string { return fmt.Sprintf("%ds", c.SkipFwd) }, func(d int) { c.SkipFwd = cycleInt(c.SkipFwd, []int{10, 15, 30, 45, 60}, d) }, "→ key"},
-		{"skip back", func() string { return fmt.Sprintf("%ds", c.SkipBack) }, func(d int) { c.SkipBack = cycleInt(c.SkipBack, []int{5, 10, 15, 30}, d) }, "← key"},
-		{"voice isolation mode", func() string { return a.tracker.Opts.Mode }, func(d int) {
-			a.tracker.Opts.Mode = cycleStr(a.tracker.Opts.Mode, []string{"auto", "transcript", "acoustic"}, d)
-		}, "auto follows transcript speaker labels when present, else listens; acoustic always listens"},
-		{"voice sensitivity", func() string { return fmt.Sprintf("%.2f", a.tracker.Opts.Sensitivity) }, func(d int) {
-			a.tracker.Opts.Sensitivity = clampF(a.tracker.Opts.Sensitivity+0.05*float64(d), 0, 1)
-		}, "higher splits voices more eagerly (more orbs); lower merges similar voices. { } in now playing"},
-		{"voice smoothing", func() string { return fmt.Sprintf("%.2f", a.tracker.Opts.Smoothing) }, func(d int) {
-			a.tracker.Opts.Smoothing = clampF(a.tracker.Opts.Smoothing+0.05*float64(d), 0, 0.95)
-		}, "how much each voice's fingerprint is averaged over time. ( ) in now playing"},
-		{"voice falloff", func() string { return fmt.Sprintf("%.3f", a.tracker.Opts.Falloff) }, func(d int) {
-			a.tracker.Opts.Falloff = clampF(a.tracker.Opts.Falloff+0.01*float64(d), 0.005, 0.5)
-		}, "how fast an orb dims after its speaker stops. < > in now playing"},
-		{"max voices", func() string { return fmt.Sprint(a.tracker.Opts.MaxOrbs) }, func(d int) {
-			a.tracker.Opts.MaxOrbs = clampi(a.tracker.Opts.MaxOrbs+d, 1, 12)
-		}, ""},
-		{"captions pane", func() string { return onOff(c.Captions) }, func(d int) { c.Captions = !c.Captions }, "c in now playing"},
-		{"captions side", func() string { return c.CaptionSide }, func(d int) { c.CaptionSide = cycleStr(c.CaptionSide, []string{"right", "bottom"}, d) }, ""},
-		{"captions size", func() string { return fmt.Sprintf("%d%%", c.CaptionSize) }, func(d int) { c.CaptionSize = clampi(c.CaptionSize+5*d, 20, 70) }, ""},
-		{"animated emoji", func() string { return onOff(c.Emoji) }, func(d int) { c.Emoji = !c.Emoji }, fmt.Sprintf("%d trigger words map to %d animated glyphs", 0, 0)},
-		{"emoji style", func() string { return c.EmojiStyle }, func(d int) {
-			c.EmojiStyle = cycleStr(c.EmojiStyle, []string{"blocks", "braille", "ascii", "chunky"}, d)
-		}, ""},
-		{"emoji colour", func() string { return c.EmojiColour }, func(d int) {
-			c.EmojiColour = cycleStr(c.EmojiColour, []string{"emoji", "theme", "rainbow", "fire", "ice", "neon", "matrix", "mono"}, d)
-		}, "emoji = natural colours, otherwise a gradient"},
-		{"speaker names", func() string { return onOff(a.visOpts.Names) }, func(d int) { a.visOpts.Names = !a.visOpts.Names }, "names under the visualizer"},
-		{"podcast icons", func() string { return onOff(c.ShowIcons) }, func(d int) { c.ShowIcons = !c.ShowIcons }, ""},
+		}, "", nil},
+		{"download folder", func() string { return c.DownloadDir }, nil, "change with: sopebox path <dir>", nil},
+		action("apply auto-download now", "download and tidy up episodes to match the policy above", a.applyAutoDownload),
+
+		section("Podcasts"),
+		{"refresh feeds on start", func() string { return onOff(c.RefreshStart) }, func(d int) { c.RefreshStart = !c.RefreshStart }, "", nil},
+		{"podcast list shows", func() string { return listModes[a.pv.mode] }, a.setListMode, "what the Podcasts view lists: shows and their episodes, every episode, or only downloads", nil},
+		{"podcast icons", func() string { return onOff(c.ShowIcons) }, func(d int) {
+			c.ShowIcons = !c.ShowIcons
+			a.kittyClear()
+		}, "", nil},
 		{"icon style", func() string { return c.IconMode }, func(d int) {
 			c.IconMode = cycleStr(c.IconMode, IconModes, d)
 			if c.IconMode == "kitty" && !art.KittySupported() {
 				c.IconMode = cycleStr(c.IconMode, IconModes, d)
 			}
 			a.kittyClear()
-		}, "blocks = true colour half blocks, ascii, kitty = pixel-perfect in Ghostty/Kitty/WezTerm"},
-		{"whisper model", func() string { return c.WhisperModel }, func(d int) { c.WhisperModel = cycleStr(c.WhisperModel, transcript.Models, d) }, "downloaded on first use to ~/.cache/sopebox/models; *.en are English-only and faster"},
+		}, "blocks = true colour half blocks, ascii, kitty = pixel-perfect in Ghostty/Kitty/WezTerm", nil},
+		action("refresh every podcast", "check every feed for new episodes (r in the podcast list refreshes one)", a.refreshAll),
+		action("clear the queue", "remove every episode from the queue", a.clearQueue),
+
+		section("Visualizer"),
+		{"visualizer", func() string { return vis.Registry[a.visIdx].Name() }, func(d int) { a.cycleVis(d) }, "v in now playing", nil},
+		{"theme", func() string { return a.themeNames[a.themeIdx] }, func(d int) { a.cycleTheme(d) }, "t in now playing · 'match' follows the podcast icon", nil},
+		{"gradient", func() string { return o.Gradient }, func(d int) { o.Gradient = cycleStr(o.Gradient, vis.GradientNames, d) }, "", nil},
+		{"orb fill", func() string { return o.Fill }, func(d int) { o.Fill = cycleStr(o.Fill, vis.FillNames, d) }, "", nil},
+		{"peak dots", func() string { return onOff(o.Peaks) }, func(d int) { o.Peaks = !o.Peaks }, "", nil},
+		{"mirror", func() string { return onOff(o.Mirror) }, func(d int) { o.Mirror = !o.Mirror }, "", nil},
+		{"orb physics", func() string { return onOff(o.Physics) }, func(d int) { o.Physics = !o.Physics }, "orbs drift and push each other apart", nil},
+		{"rotation", func() string { return fmt.Sprintf("%.2f", o.Rotate) }, func(d int) { o.Rotate = clampF(o.Rotate+0.05*float64(d), -2, 2) }, "", nil},
+		{"orb size", func() string { return fmt.Sprintf("%.1f", o.OrbSize) }, func(d int) { o.OrbSize = clampF(o.OrbSize+0.1*float64(d), 0.4, 2.5) }, "", nil},
+		{"smoothing", func() string { return fmt.Sprintf("%.2f", o.Smoothing) }, func(d int) { o.Smoothing = clampF(o.Smoothing+0.05*float64(d), 0, 0.95) }, "", nil},
+		{"gain", func() string { return fmt.Sprintf("%.1f", o.Gain) }, func(d int) { o.Gain = clampF(o.Gain+0.1*float64(d), 0.1, 10) }, "", nil},
+		{"falloff", func() string { return fmt.Sprintf("%.2f", o.Falloff) }, func(d int) { o.Falloff = clampF(o.Falloff+0.01*float64(d), 0.01, 1) }, "", nil},
+		{"speaker names", func() string { return onOff(o.Names) }, func(d int) { o.Names = !o.Names }, "names under the visualizer", nil},
+		{"frames per second", func() string { return fmt.Sprint(c.VisFPS) }, func(d int) { c.VisFPS = cycleInt(c.VisFPS, []int{15, 20, 30, 45, 60}, d) }, "takes effect on restart", nil},
+		action("reset tuning", "put the visualizer and voice knobs back to their defaults", a.resetTuning),
+
+		section("Voices"),
+		{"voice isolation mode", func() string { return vo.Mode }, func(d int) {
+			vo.Mode = cycleStr(vo.Mode, []string{"auto", "transcript", "acoustic"}, d)
+		}, "auto follows transcript speaker labels when present, else listens; acoustic always listens", nil},
+		{"voice sensitivity", func() string { return fmt.Sprintf("%.2f", vo.Sensitivity) }, func(d int) {
+			vo.Sensitivity = clampF(vo.Sensitivity+0.05*float64(d), 0, 1)
+		}, "higher splits voices more eagerly (more orbs); lower merges similar voices. { } in now playing", nil},
+		{"voice smoothing", func() string { return fmt.Sprintf("%.2f", vo.Smoothing) }, func(d int) {
+			vo.Smoothing = clampF(vo.Smoothing+0.05*float64(d), 0, 0.95)
+		}, "how much each voice's fingerprint is averaged over time", nil},
+		{"voice falloff", func() string { return fmt.Sprintf("%.3f", vo.Falloff) }, func(d int) {
+			vo.Falloff = clampF(vo.Falloff+0.01*float64(d), 0.005, 0.5)
+		}, "how fast an orb dims after its speaker stops", nil},
+		{"max voices", func() string { return fmt.Sprint(vo.MaxOrbs) }, func(d int) {
+			vo.MaxOrbs = clampi(vo.MaxOrbs+d, 1, 12)
+		}, "", nil},
+		action("name voice from feed", "name the speaking voice after the next person the feed declares (N in now playing types a name)", a.nameFromPersons),
+		action("merge voice", "merge the speaking voice into the previous one, when one person was split in two", a.mergeVoice),
+		action("clear episode voices", "forget the voices found in this episode", a.clearVoices),
+		action("forget podcast voices", "forget every voice learned for the playing podcast", a.forgetVoices),
+
+		section("Captions"),
+		{"captions pane", func() string { return onOff(c.Captions) }, func(d int) { c.Captions = !c.Captions }, "c in now playing", nil},
+		{"captions side", func() string { return c.CaptionSide }, func(d int) { c.CaptionSide = cycleStr(c.CaptionSide, []string{"right", "bottom"}, d) }, "", nil},
+		{"captions size", func() string { return fmt.Sprintf("%d%%", c.CaptionSize) }, func(d int) { c.CaptionSize = clampi(c.CaptionSize+5*d, 20, 70) }, "", nil},
+		{"animated emoji", func() string { return onOff(c.Emoji) }, func(d int) { c.Emoji = !c.Emoji }, fmt.Sprintf("%d trigger words map to %d animated glyphs", captions.TriggerCount(), len(glyph.Registry)), nil},
+		{"emoji style", func() string { return c.EmojiStyle }, func(d int) {
+			c.EmojiStyle = cycleStr(c.EmojiStyle, []string{"blocks", "braille", "ascii", "chunky"}, d)
+		}, "", nil},
+		{"emoji colour", func() string { return c.EmojiColour }, func(d int) {
+			c.EmojiColour = cycleStr(c.EmojiColour, []string{"emoji", "theme", "rainbow", "fire", "ice", "neon", "matrix", "mono"}, d)
+		}, "emoji = natural colours, otherwise a gradient", nil},
+		action("reload captions", "fetch the playing episode's transcript from the feed again", a.reloadCaptions),
+
+		section("Transcription"),
+		{"whisper model", func() string { return c.WhisperModel }, func(d int) { c.WhisperModel = cycleStr(c.WhisperModel, transcript.Models, d) }, "downloaded on first use to ~/.cache/sopebox/models; *.en are English-only and faster", nil},
 		{"auto transcribe", func() string { return c.AutoTranscribe }, func(d int) {
 			c.AutoTranscribe = cycleStr(c.AutoTranscribe, []string{"off", "downloaded", "always"}, d)
-		}, "run whisper automatically when an episode without a feed transcript starts"},
+		}, "run whisper automatically when an episode without a feed transcript starts (T in now playing does it by hand)", nil},
+		{"whisper.cpp", func() string {
+			if p := transcript.FindWhisper(c.WhisperBin); p != "" {
+				return p
+			}
+			return "not found (brew install whisper-cpp)"
+		}, nil, "", nil},
+
+		section("Collage"),
 		{"collage model", func() string { return c.CollageModel }, func(d int) { c.CollageModel = cycleStr(c.CollageModel, CollageModels, d) },
-			"the Claude model that reads transcripts for the collage: opus is best at telling who is meant, haiku is cheapest"},
+			"the Claude model that reads transcripts for the collage: opus is best at telling who is meant, haiku is cheapest", nil},
 		{"collage pictures", func() string {
 			if c.CollageImages == "kitty" && !a.canKitty {
 				return "kitty (not supported here: blocks)"
@@ -330,7 +431,18 @@ func (a *App) settings() []setting {
 		}, func(d int) {
 			c.CollageImages = cycleStr(c.CollageImages, []string{"kitty", "blocks"}, d)
 			a.kt.hide(a.kittyOut)
-		}, "kitty = real pictures in Ghostty/Kitty/WezTerm, blocks = coloured half blocks anywhere"},
+		}, "kitty = real pictures in Ghostty/Kitty/WezTerm, blocks = coloured half blocks anywhere", nil},
+		{"collage prep", func() string {
+			if p := playingPodcast(); p != nil {
+				return onOff(p.Collage) + " for " + p.Title
+			}
+			return "nothing playing"
+		}, func(d int) {
+			if p := playingPodcast(); p != nil {
+				a.toggleCollagePrep(p)
+			}
+		}, "the playing podcast's new downloads are transcribed and read by Claude in the background (P in the podcast list does it for any show)", nil},
+		action("ask Claude again", "read this episode's transcript with Claude again, e.g. after changing the model", a.redoMentions),
 		{"Claude API key", func() string {
 			switch {
 			case os.Getenv("ANTHROPIC_API_KEY") != "":
@@ -341,16 +453,7 @@ func (a *App) settings() []setting {
 				return "from your Anthropic login"
 			}
 			return "not set"
-		}, func(d int) {}, "set ANTHROPIC_API_KEY, or add anthropic_api_key = … to the config file"},
-		{"whisper.cpp", func() string {
-			if p := transcript.FindWhisper(c.WhisperBin); p != "" {
-				return p
-			}
-			return "not found (brew install whisper-cpp)"
-		}, func(d int) {}, ""},
-		{"theme", func() string { return a.themeNames[a.themeIdx] }, func(d int) { a.cycleTheme(d) }, ""},
-		{"visualizer", func() string { return vis.Registry[a.visIdx].Name() }, func(d int) { a.cycleVis(d) }, ""},
-		{"frames per second", func() string { return fmt.Sprint(c.VisFPS) }, func(d int) { c.VisFPS = cycleInt(c.VisFPS, []int{15, 20, 30, 45, 60}, d) }, "takes effect on restart"},
+		}, nil, "set ANTHROPIC_API_KEY, or add anthropic_api_key = … to the config file", nil},
 	}
 }
 
@@ -373,14 +476,18 @@ func (a *App) drawSettings(w, h int) {
 	if rows < 1 {
 		return
 	}
-	if a.setCur >= len(items) {
-		a.setCur = len(items) - 1
+	if a.setCur >= len(items) || items[a.setCur].header() {
+		a.setCur = settingStep(items, a.setCur, 1)
 	}
 	a.setScroll = listWindow(a.setCur, a.setScroll, len(items), rows)
 	nameW := 24
 	for i := 0; i < rows && a.setScroll+i < len(items); i++ {
 		s := items[a.setScroll+i]
 		ry := top + 1 + i
+		if s.header() {
+			a.puts(2, ry, fit(s.name, w-4), a.st(a.th.Accent).Bold(true), w-4)
+			continue
+		}
 		sel := a.setScroll+i == a.setCur
 		base := tcell.StyleDefault
 		if sel {

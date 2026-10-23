@@ -173,17 +173,17 @@ func (a *App) drawBottomLine(w, h int) {
 	var hint string
 	switch a.view {
 	case ViewNow:
-		hint = "space play/pause · ←/→ skip · v style · t theme · c captions · { } voice sensitivity · N name voice · d download · T transcribe"
+		hint = "space play/pause · ←/→ skip · ↑/↓ volume · v style · t theme · c captions · { } voice sensitivity · N name voice · d download · T transcribe"
 	case ViewPodcasts:
-		hint = "enter play · e queue · d download · a add feed · r refresh · i find icon · / filter · A auto-download · x unsubscribe"
+		hint = "enter play · e queue · d download · D delete download · m played · a add feed · r refresh · i find icon · / filter · A auto-download · P collage prep · x unsubscribe"
 	case ViewQueue:
 		hint = "enter play · x remove · J/K move · C clear"
 	case ViewDownloads:
-		hint = "enter play · x cancel · C clear finished · settings: auto-download in 6"
+		hint = "enter play · x cancel · C clear finished · auto-download options in settings (6)"
 	case ViewSearch:
 		hint = "type to search iTunes · enter subscribe · esc back"
 	case ViewSettings:
-		hint = "↑/↓ choose · ←/→ enter change"
+		hint = "↑/↓ choose · ←/→ change · enter change or run"
 	}
 	a.puts(1, y, fit(hint, w-2), a.st(a.th.Muted), w-2)
 }

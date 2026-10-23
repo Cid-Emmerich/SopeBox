@@ -316,7 +316,7 @@ func (a *App) collageStatus() (string, string) {
 	case "extracting":
 		return "Claude is reading the transcript…", "about a minute for an hour of conversation; pictures follow as it's played"
 	case "failed":
-		return "couldn't find who and what is mentioned", a.tlErr + " · press P to try again"
+		return "couldn't find who and what is mentioned", a.tlErr + " · settings → ask Claude again"
 	case "nokey":
 		return "the collage needs a Claude API key", "set ANTHROPIC_API_KEY, or add anthropic_api_key = … to " + a.cfg.ConfigPath
 	}
