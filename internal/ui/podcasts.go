@@ -249,9 +249,6 @@ func (a *App) drawPodcastList(x, y, w, h int) {
 			if n := p.AutoDownload; n > 0 {
 				sub += fmt.Sprintf(" · auto %d", n)
 			}
-			if p.Collage {
-				sub += " · collage"
-			}
 			a.puts(tx, ry+1, fit(sub, tw), base.Foreground(tc(a.th.Muted)), tw)
 		}
 	}
@@ -463,9 +460,6 @@ func (a *App) drawDetails(x, y, w, h int) {
 			}
 		}
 		extras := []string{auto}
-		if p.Collage {
-			extras = append(extras, "collage prep: on")
-		}
 		if len(p.Voices) > 0 {
 			var names []string
 			for _, vp := range p.Voices {

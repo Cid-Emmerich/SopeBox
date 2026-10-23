@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"io"
 	"strings"
 	"testing"
 	"time"
@@ -21,10 +20,6 @@ import (
 // and no audio device.
 func newTestApp(t *testing.T) (*App, tcell.SimulationScreen) {
 	t.Helper()
-	// never reach the real Claude API or a real Anthropic login from tests
-	for _, k := range []string{"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"} {
-		t.Setenv(k, "")
-	}
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	cfg := config.Default()
 	cfg.CacheDir = t.TempDir()
@@ -50,8 +45,6 @@ func newTestApp(t *testing.T) (*App, tcell.SimulationScreen) {
 	scr.SetSize(120, 36)
 	a.scr = scr
 	a.dl = download.New(lib, cfg.DownloadDir, 1, nil)
-	a.canKitty = false
-	a.kittyOut = io.Discard
 	return a, scr
 }
 
@@ -127,7 +120,7 @@ func TestPlayAndCaptions(t *testing.T) {
 		t.Errorf("caption text missing:\n%s", dump(scr))
 	}
 	// keys should not panic
-	for _, r := range "cCuUjJkLgGixypwWeE,.[];'R{}()<>MBKX" {
+	for _, r := range "vtc{}N" {
 		a.handleKey(tcell.NewEventKey(tcell.KeyRune, r, 0))
 		a.draw()
 	}
@@ -138,7 +131,7 @@ func TestKeysAcrossViews(t *testing.T) {
 	a, scr := newTestApp(t)
 	for v := ViewNow; v < numViews; v++ {
 		a.switchView(v)
-		for _, r := range "jkhlJKeExzomarCA/" {
+		for _, r := range "eExzmarDCAJK/" {
 			a.handleKey(tcell.NewEventKey(tcell.KeyRune, r, 0))
 			a.prompt.active = false
 			a.pv.typing = false
@@ -151,4 +144,44 @@ func TestKeysAcrossViews(t *testing.T) {
 		}
 	}
 	_ = dump(scr)
+}
+
+func TestSettingsSkipsHeadersAndRunsActions(t *testing.T) {
+	a, _ := newTestApp(t)
+	a.switchView(ViewSettings)
+	a.draw()
+	items := a.settings()
+	if items[a.setCur].header() {
+		t.Fatalf("cursor starts on header %q", items[a.setCur].name)
+	}
+	// walk the whole list both ways: the cursor never rests on a header
+	for _, k := range []tcell.Key{tcell.KeyDown, tcell.KeyUp} {
+		for i := 0; i < len(items)+2; i++ {
+			a.handleKey(tcell.NewEventKey(k, 0, 0))
+			if items[a.setCur].header() {
+				t.Fatalf("cursor rests on header %q", items[a.setCur].name)
+			}
+		}
+	}
+	// every option can be changed both ways without panicking
+	for i, s := range items {
+		if s.header() || s.run != nil {
+			continue
+		}
+		a.setCur = i
+		a.handleKey(tcell.NewEventKey(tcell.KeyRight, 0, 0))
+		a.handleKey(tcell.NewEventKey(tcell.KeyLeft, 0, 0))
+		a.draw()
+	}
+	// enter on an action runs it
+	for i, s := range items {
+		if s.name == "reset tuning" {
+			a.setCur = i
+		}
+	}
+	a.visOpts.Gain = 9
+	a.handleKey(tcell.NewEventKey(tcell.KeyEnter, 0, 0))
+	if a.visOpts.Gain == 9 {
+		t.Fatal("enter on reset tuning did not reset the gain")
+	}
 }

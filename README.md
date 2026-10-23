@@ -63,25 +63,20 @@ one), press **i** on it to search iTunes for its artwork, exactly like
 
 ## The voice visualizer
 
-The now-playing screen is the point of the app. Nine styles, cycled with
+The now-playing screen is the point of the app. Four styles, cycled with
 **v**:
 
 | style | what it does |
 |---|---|
-| `orbs` | one radial spectrum per voice, floating together with gentle physics; the active speaker drifts to the centre |
 | `constellation` | voices as pulsing stars, joined by lines that light up along the flow of conversation (who answers whom) |
-| `halo` | nested rings around a shared centre, one ring per voice |
-| `ribbon` | a row of orbs above a scrolling who-spoke-when timeline |
 | `wordflow` | orbs plus the words they say, drifting away from the speaker (loud words get a ✦) |
-| `pulse` | a single breathing orb that changes colour with the speaker |
 | `talktime` | a living donut of each person's share of the talking |
 | `bars` | the classic analyser, tinted by whoever is speaking |
-| `collage` | pictures of the people, places and events being talked about, as they come up ([below](#the-collage)) |
 
 ### How voices are told apart
 
 SopeBox has two ways to know who is talking, chosen by the **voice mode**
-(**M**, or in Settings):
+(Settings → *voice isolation mode*):
 
 - **transcript** — if the episode has a transcript with speaker labels
   (Podcasting 2.0 `<podcast:transcript>` JSON/VTT/SRT/HTML files, like No
@@ -95,89 +90,38 @@ SopeBox has two ways to know who is talking, chosen by the **voice mode**
 - **auto** (default) uses the transcript when it has speakers, else listens.
 
 Three knobs shape the acoustic isolation, mirroring wvfrm's
-smoothing/sensitivity/falloff:
+smoothing/sensitivity/falloff. Sensitivity is also on `{` / `}` in the
+now-playing view; all three are in Settings → *Voices*:
 
-| key | setting | effect |
-|---|---|---|
-| `{` / `}` | **sensitivity** | lower merges similar voices into one orb; higher splits eagerly into more orbs |
-| `(` / `)` | **smoothing** | how much each voice fingerprint is averaged over time |
-| `<` / `>` | **falloff** | how quickly an orb dims after its speaker stops |
+| setting | effect |
+|---|---|
+| **sensitivity** | lower merges similar voices into one orb; higher splits eagerly into more orbs |
+| **smoothing** | how much each voice fingerprint is averaged over time |
+| **falloff** | how quickly an orb dims after its speaker stops |
 
 Voices are **remembered per podcast**: when you quit (or the episode changes)
 the fingerprints of anyone who spoke for more than 15 seconds are saved with
 the show, so the same hosts get the same orbs next episode. Press **N** to type
-a name for the voice that is speaking, or **B** to pick one from the people the
-feed declares (`<podcast:person>`). **K** merges the current voice into the
-previous one when the tracker split one person in two; **X** clears this
-episode's voices; **F** forgets everything learned for the show.
+a name for the voice that is speaking. The rest are actions in Settings →
+*Voices*: *name voice from feed* picks a name from the people the feed
+declares (`<podcast:person>`), *merge voice* joins the current voice to the
+previous one when the tracker split one person in two, *clear episode voices*
+starts this episode over, and *forget podcast voices* forgets everything
+learned for the show.
 
 ### Tuning the look
 
-The wvfrm tuning keys are all here: **g/G** gradient, **i** orb fill (braille,
-dots, rings, petals, ascii, block), **x** peak dots, **p** orb physics, **w/W**
-rotation, **e/E** orb size, **,/.** smoothing, **[/]** gain, **;/'** falloff,
-**L** speaker names, **R** reset. **t/T** cycle fourteen colour themes; the
+The wvfrm tuning knobs are all in Settings → *Visualizer*: gradient, orb fill
+(braille, dots, rings, petals, ascii, block), peak dots, mirror, orb physics,
+rotation, orb size, smoothing, gain, falloff, speaker names and *reset tuning*.
+**t** cycles fourteen colour themes; the
 `match` theme takes its colours from the podcast's icon. Every orb has its own
 colour from the theme's voice palette.
 
-## The collage
-
-The `collage` style is for shows like *The Rest Is History*. When someone
-mentions Tewodros II, the Battle of Magdala or Queen Victoria, their picture
-appears on screen. The newest mention is shown large, the four before it sit
-alongside, and each has Wikipedia's one-line description underneath.
-
-How it works:
-
-1. **Transcript.** It needs the episode's words ahead of time: from the feed,
-   or made locally with whisper.cpp from a downloaded episode (this starts
-   automatically when you switch to the collage).
-2. **Claude reads it once.** The whole transcript goes to Claude in one
-   request. Claude returns every person, place, event and thing, when it is
-   first mentioned, which Wikipedia article it is, and what else it is called. Claude fixes names
-   whisper got wrong ("Teodros" → Tewodros II) and works out who is meant
-   ("Henry" in a Tudor episode → Henry VIII). The result is cached, so seeking
-   and replaying cost nothing.
-3. **Wikipedia pictures.** Each article's main image and description are
-   fetched ahead of the moment they are needed, and cached.
-
-In Ghostty, Kitty and WezTerm the pictures are real images (the Kitty
-graphics protocol). Elsewhere, or with *collage pictures* set to `blocks`,
-they are drawn in coloured half blocks.
-
-**Setup:** it needs a Claude API key. Create one at
-[console.anthropic.com](https://console.anthropic.com), then either export it:
-
-```sh
-export ANTHROPIC_API_KEY=sk-ant-…
-```
-
-or add `anthropic_api_key = sk-ant-…` to `~/.config/sopebox/sopeboxrc` (the
-file is written owner-only). The model is set under Settings → *collage
-model*. The default, `claude-opus-5-5`, is best at working out who is meant
-and costs roughly 15–25¢ for an hour-long episode. `claude-haiku-4-5` costs
-about a tenth of that.
-
-| key | where | what |
-|---|---|---|
-| `v` | now playing | cycle to the `collage` style |
-| `P` | now playing | ask Claude again for this episode (e.g. after changing model) |
-| `P` | podcast list | **collage prep** for a show: its newest downloads are transcribed, read by Claude and have their pictures fetched in the background, so they are ready when you press play |
-
-From the shell, `sopebox collage <episode words>` does the same for one
-episode and prints the timeline it found. Run it again and it reuses what
-Claude found the first time, at no charge; add `--fresh` to ask Claude again.
-
-Claude lists each entity once, along with the other ways it is referred to
-("Teodros", "Theodore", "the emperor"). SopeBox then searches the
-transcript for those names, so when the conversation returns to someone
-after three minutes or more, their picture comes back to the front. A
-first name shared by several people ("Henry") is never used on its own.
-
 ## Captions and animated emoji
 
-The captions pane (right side by default; **C** moves it to the bottom, **u/U**
-resize it, **c** hides it) shows the current line with the spoken word lit,
+The captions pane (right side by default; **c** hides it, and Settings →
+*Captions* moves it to the bottom or resizes it) shows the current line with the spoken word lit,
 recent lines above, the next line below, and chapter markers from
 `<podcast:chapters>` (they also appear as ticks on the progress bar).
 
@@ -185,9 +129,9 @@ Whenever a spoken word matches one of ~550 trigger words, the corresponding
 one of G1yph's 100 hand-drawn animated glyphs plays at the top of the pane:
 *coffee*, *fire*, *rocket*, *laughing*, *love*, *cat*, *idea*, *rain*, *America*,
 *billion*, and so on. Sound cues from transcripts work too (`[laughter]`,
-`[music]`, `[applause]`), and a question gets a raised hand. **j** toggles
-the emoji, **J** picks the render style (blocks, braille, ascii, chunky) and
-**k** the colouring.
+`[music]`, `[applause]`), and a question gets a raised hand. Settings →
+*Captions* turns the emoji on or off and picks the render style (blocks,
+braille, ascii, chunky) and the colouring.
 
 ### Where transcripts come from
 
@@ -207,9 +151,9 @@ tracker still separates the voices. The `small.en-tdrz` model adds speaker
 
 The **Podcasts** view is castero's layout: shows on the left (with a tiny
 icon each), episodes on the right, details underneath with the show's
-artwork. **l** cycles the episode list between *this podcast*, *all recent
-episodes* and *downloaded*. **/** filters by words. **enter** plays
-(streaming, or from disk if downloaded), **e** queues, **E** plays next,
+artwork. Settings → *podcast list shows* switches the episode list between
+*this podcast*, *all recent episodes* and *downloaded*. **/** filters by
+words. **enter** plays (streaming, or from disk if downloaded), **e** queues,
 **d** downloads, **D** deletes a download, **m** marks played.
 
 **Downloads** run in the background (2 at a time by default) into
@@ -218,12 +162,21 @@ have SopeBox keep the **1, 3, 5 or 10 most recent episodes** of every show
 downloaded automatically (Settings → *auto-download latest*), override it per
 show with **A** in the podcast list, and optionally have old automatic
 downloads removed (*keep only latest*). The policy runs after every feed
-refresh; press **a** in the Downloads view to apply it now.
+refresh; Settings → *apply auto-download now* runs it straight away.
 
 Playback remembers where you were in every episode, resumes the last episode
-on start, and continues with the queue when an episode ends. **s/S** change
-speed with pitch preserved; **←/→** skip 10 s back / 30 s forward (shift for
-4×).
+on start, and continues with the queue when an episode ends. **←/→** skip
+10 s back / 30 s forward (shift for 4×) and **↑/↓** change the volume.
+Speed (pitch preserved), mute and next / previous episode are in Settings →
+*Playback*.
+
+## Keys
+
+Only the keys shown at the bottom of each view are bound, so there is little
+to remember: press **ctrl+k** for the list. Everywhere: **space** play/pause,
+**1–6** or **tab** switch views, **esc** back to now playing, **q** quit.
+Every other option and action is a row in **Settings (6)**: **↑/↓** choose,
+**←/→** change, **enter** changes it or runs an action.
 
 ## Command line
 
@@ -239,7 +192,7 @@ sopebox list                     # list subscriptions
 sopebox download [show] [n]      # download the n newest episodes (default 3)
 sopebox transcribe <words>       # whisper.cpp on a downloaded episode
 sopebox path <dir>               # set the download folder
-sopebox -t synthwave -v halo     # start with a theme and a visualizer
+sopebox -t synthwave -v bars     # start with a theme and a visualizer
 ```
 
 ## Files
@@ -264,7 +217,7 @@ cmd/sopebox         command line entry point
 internal/audio      ffmpeg-backed player: files and streams, seeking, speed
 internal/dsp        FFT analyzer plus voice features (pitch, timbre, voicing)
 internal/voices     the speaker tracker that turns features into orbs
-internal/vis        the eight visualizer styles and orb physics
+internal/vis        the four visualizer styles and orb physics
 internal/captions   word → emoji triggers, the emoji animator, caption wrapping
 internal/transcript feed transcripts (JSON/VTT/SRT/HTML), whisper.cpp, chapters
 internal/feed       RSS with iTunes + Podcasting 2.0 namespaces, OPML, castero

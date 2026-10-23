@@ -6,7 +6,6 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
-	"github.com/Cid-Emmerich/SopeBox/internal/art"
 	"github.com/Cid-Emmerich/SopeBox/internal/config"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
 	"github.com/Cid-Emmerich/SopeBox/internal/store"
@@ -176,6 +175,8 @@ func (a *App) handleKey(e *tcell.EventKey) {
 	}
 
 	// --- Rune keys: global -------------------------------------------------
+	// Only the keys shown on screen are bound; every other option lives in
+	// the Settings view.
 	switch r {
 	case 'q':
 		a.quit = true
@@ -196,47 +197,6 @@ func (a *App) handleKey(e *tcell.EventKey) {
 		}
 		a.pl.TogglePause()
 		return
-	case '+', '=':
-		a.pl.VolumeDelta(0.05)
-		return
-	case '-', '_':
-		a.pl.VolumeDelta(-0.05)
-		return
-	case 'm':
-		if a.view == ViewPodcasts {
-			a.togglePlayed()
-			return
-		}
-		a.pl.ToggleMute()
-		return
-	case 's':
-		a.showToast(fmt.Sprintf("speed %.2fx", a.pl.SpeedDelta(0.1)), false)
-		return
-	case 'S':
-		a.showToast(fmt.Sprintf("speed %.2fx", a.pl.SpeedDelta(-0.1)), false)
-		return
-	case 'n':
-		a.playNext()
-		return
-	case 'b':
-		a.playPrev()
-		return
-	case 't':
-		a.cycleTheme(1)
-		return
-	case 'T':
-		if a.view == ViewNow {
-			a.transcribe()
-		} else {
-			a.cycleTheme(-1)
-		}
-		return
-	case 'v':
-		a.cycleVis(1)
-		return
-	case 'V':
-		a.cycleVis(-1)
-		return
 	}
 
 	switch a.view {
@@ -250,8 +210,6 @@ func (a *App) handleKey(e *tcell.EventKey) {
 		a.downloadsKey(r)
 	case ViewSearch:
 		a.searchKey(r)
-	case ViewSettings:
-		a.settingsKey(r)
 	}
 }
 
@@ -280,7 +238,7 @@ func (a *App) leftRight(dir int, mod tcell.ModMask) {
 		}
 	case ViewSettings:
 		items := a.settings()
-		if a.setCur < len(items) {
+		if a.setCur < len(items) && items[a.setCur].cycle != nil {
 			items[a.setCur].cycle(dir)
 		}
 	default:
@@ -337,7 +295,7 @@ func (a *App) listMove(d int) {
 		}
 		a.sv.cursor = clampi(a.sv.cursor+d, 0, max(0, len(a.sv.results)-1))
 	case ViewSettings:
-		a.setCur = clampi(a.setCur+d, 0, len(a.settings())-1)
+		a.setCur = settingStep(a.settings(), a.setCur, d)
 	}
 }
 
@@ -383,8 +341,14 @@ func (a *App) activate() {
 		}
 	case ViewSettings:
 		items := a.settings()
-		if a.setCur < len(items) {
-			items[a.setCur].cycle(1)
+		if a.setCur >= len(items) {
+			return
+		}
+		switch s := items[a.setCur]; {
+		case s.run != nil:
+			s.run()
+		case s.cycle != nil:
+			s.cycle(1)
 		}
 	}
 }
@@ -394,145 +358,76 @@ func (a *App) deleteKey() {
 	case ViewQueue:
 		a.queueKey('x')
 	case ViewPodcasts:
-		a.podcastsKey('D')
+		a.deleteDownload()
 	}
 }
 
 // --- now playing --------------------------------------------------------------
 
 func (a *App) nowKey(r rune) {
-	o := &a.visOpts
 	vo := &a.tracker.Opts
 	switch r {
+	case 'v':
+		a.cycleVis(1)
+	case 't':
+		a.cycleTheme(1)
 	case 'c':
 		a.cfg.Captions = !a.cfg.Captions
 		a.showToast("captions "+onOff(a.cfg.Captions), false)
-	case 'C':
-		a.cfg.CaptionSide = cycleStr(a.cfg.CaptionSide, []string{"right", "bottom"}, 1)
-		a.showToast("captions on the "+a.cfg.CaptionSide, false)
-	case 'u':
-		a.cfg.CaptionSize = clampi(a.cfg.CaptionSize-5, 20, 70)
-	case 'U':
-		a.cfg.CaptionSize = clampi(a.cfg.CaptionSize+5, 20, 70)
-	case 'j':
-		a.cfg.Emoji = !a.cfg.Emoji
-		a.showToast("animated emoji "+onOff(a.cfg.Emoji), false)
-	case 'J':
-		a.cfg.EmojiStyle = cycleStr(a.cfg.EmojiStyle, []string{"blocks", "braille", "ascii", "chunky"}, 1)
-		a.showToast("emoji style: "+a.cfg.EmojiStyle, false)
-	case 'k':
-		a.cfg.EmojiColour = cycleStr(a.cfg.EmojiColour, []string{"emoji", "theme", "rainbow", "fire", "ice", "neon", "matrix", "mono"}, 1)
-		a.showToast("emoji colour: "+a.cfg.EmojiColour, false)
-	case 'L':
-		o.Names = !o.Names
-	case 'g':
-		o.Gradient = cycleStr(o.Gradient, vis.GradientNames, 1)
-		a.showToast("gradient: "+o.Gradient, false)
-	case 'G':
-		o.Gradient = cycleStr(o.Gradient, vis.GradientNames, -1)
-		a.showToast("gradient: "+o.Gradient, false)
-	case 'i':
-		o.Fill = cycleStr(o.Fill, vis.FillNames, 1)
-		a.showToast("fill: "+o.Fill, false)
-	case 'x':
-		o.Peaks = !o.Peaks
-	case 'y':
-		o.Mirror = !o.Mirror
-	case 'p':
-		o.Physics = !o.Physics
-		a.showToast("orb physics "+onOff(o.Physics), false)
-	case 'w':
-		o.Rotate = clampF(o.Rotate+0.05, -2, 2)
-		a.showToast(fmt.Sprintf("rotation %.2f", o.Rotate), false)
-	case 'W':
-		o.Rotate = clampF(o.Rotate-0.05, -2, 2)
-		a.showToast(fmt.Sprintf("rotation %.2f", o.Rotate), false)
-	case 'e':
-		o.OrbSize = clampF(o.OrbSize+0.1, 0.4, 2.5)
-		a.showToast(fmt.Sprintf("orb size %.1f", o.OrbSize), false)
-	case 'E':
-		o.OrbSize = clampF(o.OrbSize-0.1, 0.4, 2.5)
-		a.showToast(fmt.Sprintf("orb size %.1f", o.OrbSize), false)
-	case ',':
-		o.Smoothing = clampF(o.Smoothing-0.05, 0, 0.95)
-		a.showToast(fmt.Sprintf("smoothing %.2f", o.Smoothing), false)
-	case '.':
-		o.Smoothing = clampF(o.Smoothing+0.05, 0, 0.95)
-		a.showToast(fmt.Sprintf("smoothing %.2f", o.Smoothing), false)
-	case '[':
-		o.Gain = clampF(o.Gain-0.1, 0.1, 10)
-		a.showToast(fmt.Sprintf("gain %.1f", o.Gain), false)
-	case ']':
-		o.Gain = clampF(o.Gain+0.1, 0.1, 10)
-		a.showToast(fmt.Sprintf("gain %.1f", o.Gain), false)
-	case ';':
-		o.Falloff = clampF(o.Falloff-0.01, 0.01, 1)
-		a.showToast(fmt.Sprintf("falloff %.2f", o.Falloff), false)
-	case '\'':
-		o.Falloff = clampF(o.Falloff+0.01, 0.01, 1)
-		a.showToast(fmt.Sprintf("falloff %.2f", o.Falloff), false)
-	case 'R':
-		def := config.Default()
-		a.visOpts = vis.OptionsFromConfig(def)
-		a.visOpts.Names = o.Names
-		vo.Sensitivity, vo.Smoothing, vo.Falloff = def.VoiceSensitivity, def.VoiceSmoothing, def.VoiceFalloff
-		a.showToast("visualizer and voice settings reset", false)
-	// voice isolation
 	case '{':
 		vo.Sensitivity = clampF(vo.Sensitivity-0.05, 0, 1)
 		a.showToast(fmt.Sprintf("voice sensitivity %.2f (lower = fewer orbs)", vo.Sensitivity), false)
 	case '}':
 		vo.Sensitivity = clampF(vo.Sensitivity+0.05, 0, 1)
 		a.showToast(fmt.Sprintf("voice sensitivity %.2f (higher = more orbs)", vo.Sensitivity), false)
-	case '(':
-		vo.Smoothing = clampF(vo.Smoothing-0.05, 0, 0.95)
-		a.showToast(fmt.Sprintf("voice smoothing %.2f", vo.Smoothing), false)
-	case ')':
-		vo.Smoothing = clampF(vo.Smoothing+0.05, 0, 0.95)
-		a.showToast(fmt.Sprintf("voice smoothing %.2f", vo.Smoothing), false)
-	case '<':
-		vo.Falloff = clampF(vo.Falloff-0.01, 0.005, 0.5)
-		a.showToast(fmt.Sprintf("voice falloff %.3f", vo.Falloff), false)
-	case '>':
-		vo.Falloff = clampF(vo.Falloff+0.01, 0.005, 0.5)
-		a.showToast(fmt.Sprintf("voice falloff %.3f", vo.Falloff), false)
-	case 'M':
-		vo.Mode = cycleStr(vo.Mode, []string{"auto", "transcript", "acoustic"}, 1)
-		a.showToast("voice mode: "+vo.Mode, false)
 	case 'N':
 		a.renameVoice()
-	case 'B':
-		a.nameFromPersons()
-	case 'K':
-		a.mergeVoice()
-	case 'X':
-		a.tracker.Reset()
-		if a.cur != nil {
-			a.tracker.SetTranscript(a.tr)
-		}
-		a.showToast("voices cleared for this episode", false)
-	case 'F':
-		if a.cur != nil {
-			a.lib.ForgetVoices(a.cur.Podcast)
-			a.tracker.Reset()
-			a.tracker.SetTranscript(a.tr)
-			a.showToast("forgot learned voices for "+a.cur.Podcast.Title, false)
-		}
 	case 'd':
 		if a.cur != nil {
 			a.download(*a.cur)
 		}
-	case 'o':
-		a.pv.jumpToPlaying(a)
-		a.switchView(ViewPodcasts)
-	case 'r':
-		if a.cur != nil {
-			a.loadTranscript(*a.cur, true)
-			a.showToast("reloading captions", false)
-		}
-	case 'P':
-		a.redoMentions()
+	case 'T':
+		a.transcribe()
 	}
+}
+
+// resetTuning puts the visualizer and voice knobs back to their defaults.
+func (a *App) resetTuning() {
+	def := config.Default()
+	names := a.visOpts.Names
+	a.visOpts = vis.OptionsFromConfig(def)
+	a.visOpts.Names = names
+	vo := &a.tracker.Opts
+	vo.Sensitivity, vo.Smoothing, vo.Falloff = def.VoiceSensitivity, def.VoiceSmoothing, def.VoiceFalloff
+	a.showToast("visualizer and voice settings reset", false)
+}
+
+func (a *App) clearVoices() {
+	a.tracker.Reset()
+	if a.cur != nil {
+		a.tracker.SetTranscript(a.tr)
+	}
+	a.showToast("voices cleared for this episode", false)
+}
+
+func (a *App) forgetVoices() {
+	if a.cur == nil {
+		a.showToast("nothing is playing", true)
+		return
+	}
+	a.lib.ForgetVoices(a.cur.Podcast)
+	a.tracker.Reset()
+	a.tracker.SetTranscript(a.tr)
+	a.showToast("forgot learned voices for "+a.cur.Podcast.Title, false)
+}
+
+func (a *App) reloadCaptions() {
+	if a.cur == nil {
+		a.showToast("nothing is playing", true)
+		return
+	}
+	a.loadTranscript(*a.cur, true)
+	a.showToast("reloading captions", false)
 }
 
 func (a *App) currentOrb() *voices.Orb {
@@ -557,7 +452,7 @@ func (a *App) renameVoice() {
 	}
 	hint := "enter = save · esc = cancel"
 	if ps := a.tracker.Persons(); len(ps) > 0 {
-		hint = "people in this feed: " + strings.Join(ps, ", ") + " (B cycles them)"
+		hint = "people in this feed: " + strings.Join(ps, ", ")
 	}
 	a.startPrompt("name for "+o.Name, "", hint, func(s string) {
 		if s == "" {
@@ -576,7 +471,7 @@ func (a *App) nameFromPersons() {
 	o := a.currentOrb()
 	ps := a.tracker.Persons()
 	if o == nil || len(ps) == 0 {
-		a.showToast("no people declared in this feed — use N to type a name", true)
+		a.showToast("no people declared in this feed — press N to type a name", true)
 		return
 	}
 	idx := -1
@@ -620,23 +515,6 @@ func (a *App) download(it store.Item) {
 func (a *App) podcastsKey(r rune) {
 	v := &a.pv
 	switch r {
-	case 'j':
-		v.move(a, 1)
-	case 'k':
-		v.move(a, -1)
-	case 'h':
-		if v.mode == 0 {
-			v.focus = 0
-		}
-	case 'l':
-		if v.mode == 0 && v.focus == 0 {
-			v.focus = 1
-		} else {
-			v.mode = (v.mode + 1) % 3
-			v.eCursor, v.eScroll = 0, 0
-			v.rebuildEpisodes(a)
-			a.showToast("listing: "+listModes[v.mode], false)
-		}
 	case '/':
 		v.typing = true
 		if v.mode == 0 {
@@ -646,19 +524,6 @@ func (a *App) podcastsKey(r rune) {
 		if it := v.selected(); it != nil {
 			a.lib.Enqueue(it.Key())
 			a.showToast("queued: "+it.Episode.Title, false)
-		}
-	case 'E':
-		if it := v.selected(); it != nil {
-			pos := 0
-			if a.cur != nil {
-				for i, q := range a.lib.QueueItems() {
-					if q.Key() == a.cur.Key() {
-						pos = i + 1
-					}
-				}
-			}
-			a.lib.EnqueueAt(it.Key(), pos)
-			a.showToast("playing next: "+it.Episode.Title, false)
 		}
 	case 'd':
 		if v.focus == 0 && v.mode == 0 {
@@ -680,31 +545,17 @@ func (a *App) podcastsKey(r rune) {
 			a.download(*it)
 		}
 	case 'D':
-		if it := v.selected(); it != nil && it.Downloaded() {
-			if err := a.dl.Remove(*it); err != nil {
-				a.showToast("delete: "+err.Error(), true)
-			} else {
-				a.showToast("deleted download", false)
-				v.rebuildEpisodes(a)
-			}
-		} else if it != nil {
-			a.dl.Cancel(it.Key())
-		}
+		a.deleteDownload()
+	case 'm':
+		a.togglePlayed()
 	case 'a':
 		a.startPrompt("add podcast feed", "", "paste an RSS feed URL", func(s string) { a.subscribe(s) })
 	case 'r':
 		a.refreshOne(v.selectedPodcast(a))
-	case 'R':
-		a.refreshAll()
 	case 'i':
 		if p := v.selectedPodcast(a); p != nil {
 			a.showToast("searching for an icon: "+p.Title+"…", false)
 			a.requestIcon(p, true)
-		}
-	case 'I':
-		if p := v.selectedPodcast(a); p != nil {
-			delete(a.icons, p.URL)
-			a.requestIcon(p, false)
 		}
 	case 'A':
 		if p := v.selectedPodcast(a); p != nil {
@@ -720,10 +571,6 @@ func (a *App) podcastsKey(r rune) {
 				a.dl.Apply(download.Policy{Latest: a.cfg.AutoDownload, KeepLatest: a.cfg.KeepLatest})
 			}
 		}
-	case 'P':
-		if p := v.selectedPodcast(a); p != nil {
-			a.toggleCollagePrep(p)
-		}
 	case 'x':
 		if p := v.selectedPodcast(a); p != nil && v.focus == 0 && v.mode == 0 {
 			a.startPrompt("unsubscribe from "+p.Title+"?", "", "type yes to confirm", func(s string) {
@@ -734,22 +581,37 @@ func (a *App) podcastsKey(r rune) {
 				}
 			})
 		}
-	case 'o':
-		v.jumpToPlaying(a)
-	case 'z':
-		v.filter = ""
-		v.rebuildEpisodes(a)
-	case 'c':
-		a.cfg.ShowIcons = !a.cfg.ShowIcons
-		a.kittyClear()
-	case 'C':
-		a.cfg.IconMode = cycleStr(a.cfg.IconMode, IconModes, 1)
-		if a.cfg.IconMode == "kitty" && !art.KittySupported() {
-			a.cfg.IconMode = "blocks"
-		}
-		a.kittyClear()
-		a.showToast("icon style: "+a.cfg.IconMode, false)
 	}
+}
+
+// deleteDownload removes the selected episode's file, or cancels its
+// download if one is in progress.
+func (a *App) deleteDownload() {
+	v := &a.pv
+	it := v.selected()
+	switch {
+	case it == nil:
+	case it.Downloaded():
+		if err := a.dl.Remove(*it); err != nil {
+			a.showToast("delete: "+err.Error(), true)
+		} else {
+			a.showToast("deleted download", false)
+			v.rebuildEpisodes(a)
+		}
+	default:
+		a.dl.Cancel(it.Key())
+	}
+}
+
+// setListMode switches the podcasts view between its three listings.
+func (a *App) setListMode(d int) {
+	v := &a.pv
+	v.mode = (v.mode + d + len(listModes)) % len(listModes)
+	v.eCursor, v.eScroll = 0, 0
+	if v.mode != 0 {
+		v.focus = 1
+	}
+	v.rebuildEpisodes(a)
 }
 
 func (a *App) togglePlayed() {
@@ -768,10 +630,6 @@ func (a *App) togglePlayed() {
 func (a *App) queueKey(r rune) {
 	q := a.lib.QueueItems()
 	switch r {
-	case 'j':
-		a.listMove(1)
-	case 'k':
-		a.listMove(-1)
 	case 'x':
 		if a.qCursor < len(q) {
 			a.lib.Dequeue(q[a.qCursor].Key())
@@ -795,19 +653,13 @@ func (a *App) queueKey(r rune) {
 		a.lib.SetQueue(keys)
 		a.qCursor = to
 	case 'C':
-		a.lib.SetQueue(nil)
-		a.showToast("queue cleared", false)
-	case 'd':
-		if a.qCursor < len(q) {
-			a.download(q[a.qCursor])
-		}
-	case 'g', 'o':
-		for i, it := range q {
-			if a.cur != nil && it.Key() == a.cur.Key() {
-				a.qCursor = i
-			}
-		}
+		a.clearQueue()
 	}
+}
+
+func (a *App) clearQueue() {
+	a.lib.SetQueue(nil)
+	a.showToast("queue cleared", false)
 }
 
 // --- downloads -------------------------------------------------------------------
@@ -815,52 +667,25 @@ func (a *App) queueKey(r rune) {
 func (a *App) downloadsKey(r rune) {
 	jobs := a.dl.Jobs()
 	switch r {
-	case 'j':
-		a.listMove(1)
-	case 'k':
-		a.listMove(-1)
 	case 'x':
 		if a.dCursor < len(jobs) {
 			a.dl.Cancel(jobs[a.dCursor].Key)
 		}
 	case 'C':
 		a.dl.Clear()
-	case 'a':
-		q, rm := a.dl.Apply(download.Policy{Latest: a.cfg.AutoDownload, KeepLatest: a.cfg.KeepLatest})
-		a.showToast(fmt.Sprintf("auto-download applied: %d queued, %d removed", q, rm), false)
-	case 'e':
-		if a.dCursor < len(jobs) {
-			a.lib.Enqueue(jobs[a.dCursor].Key)
-			a.showToast("queued", false)
-		}
 	}
+}
+
+func (a *App) applyAutoDownload() {
+	q, rm := a.dl.Apply(download.Policy{Latest: a.cfg.AutoDownload, KeepLatest: a.cfg.KeepLatest})
+	a.showToast(fmt.Sprintf("auto-download applied: %d queued, %d removed", q, rm), false)
 }
 
 // --- search --------------------------------------------------------------------
 
 func (a *App) searchKey(r rune) {
-	switch r {
-	case 'j':
-		a.listMove(1)
-	case 'k':
-		a.listMove(-1)
-	case '/', 'i':
+	if r == '/' {
 		a.sv.typing = true
-	}
-}
-
-// --- settings ------------------------------------------------------------------
-
-func (a *App) settingsKey(r rune) {
-	switch r {
-	case 'j':
-		a.listMove(1)
-	case 'k':
-		a.listMove(-1)
-	case 'h':
-		a.leftRight(-1, 0)
-	case 'l':
-		a.leftRight(1, 0)
 	}
 }
 
@@ -877,17 +702,11 @@ func (a *App) cycleVis(d int) {
 	a.visIdx = (a.visIdx + d + len(vis.Registry)) % len(vis.Registry)
 	v := vis.Registry[a.visIdx]
 	a.showToast("visualizer: "+v.Name()+" — "+v.Describe(), false)
-	if a.collageOn() {
-		a.ensureMentions()
-	}
 }
 
 // setVis switches to a visualizer by name.
 func (a *App) setVis(name string) {
 	a.visIdx = vis.Index(name)
-	if a.collageOn() {
-		a.ensureMentions()
-	}
 }
 
 // --- mouse -------------------------------------------------------------------
