@@ -34,7 +34,6 @@ type Podcast struct {
 	IconPath     string         `json:"icon_path,omitempty"`
 	IconSource   string         `json:"icon_source,omitempty"`
 	Voices       []VoiceProfile `json:"voices,omitempty"`
-	Collage      bool           `json:"collage,omitempty"` // prepare collages for new episodes
 	Error        string         `json:"-"`
 }
 

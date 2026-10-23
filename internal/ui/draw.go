@@ -89,7 +89,6 @@ func (a *App) draw() {
 	if w < 40 || h < 10 {
 		a.puts(0, 0, "window too small", a.st(a.th.Warn), w)
 		a.scr.Show()
-		a.kt.hide(a.kittyOut)
 		return
 	}
 	a.drawHeader(w)
@@ -116,7 +115,6 @@ func (a *App) draw() {
 	}
 	a.scr.Show()
 	a.drawKitty(w, h)
-	a.drawCollageKitty()
 }
 
 // tabPositions returns [start,end) x ranges of the header tabs.
@@ -175,7 +173,7 @@ func (a *App) drawBottomLine(w, h int) {
 	case ViewNow:
 		hint = "space play/pause · ←/→ skip · ↑/↓ volume · v style · t theme · c captions · { } voice sensitivity · N name voice · d download · T transcribe"
 	case ViewPodcasts:
-		hint = "enter play · e queue · d download · D delete download · m played · a add feed · r refresh · i find icon · / filter · A auto-download · P collage prep · x unsubscribe"
+		hint = "enter play · e queue · d download · D delete download · m played · a add feed · r refresh · i find icon · / filter · A auto-download · x unsubscribe"
 	case ViewQueue:
 		hint = "enter play · x remove · J/K move · C clear"
 	case ViewDownloads:

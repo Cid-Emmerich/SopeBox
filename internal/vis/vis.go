@@ -64,7 +64,6 @@ type Frame struct {
 	Words    []FlyWord
 	Level    float64 // overall smoothed level 0..1
 	Chapter  string
-	Collage  *Collage // pictures for the collage style
 }
 
 // Visualizer draws one style.
@@ -76,15 +75,10 @@ type Visualizer interface {
 
 // Registry of all visualizers in cycling order.
 var Registry = []Visualizer{
-	&Orbs{},
 	&Constellation{},
-	&Halo{},
-	&Ribbon{},
 	&WordFlow{},
-	&Pulse{},
 	&TalkTime{},
 	&Bars{},
-	&CollageStyle{},
 }
 
 // Names lists visualizer names.

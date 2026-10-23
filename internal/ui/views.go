@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -11,8 +10,6 @@ import (
 	"github.com/Cid-Emmerich/SopeBox/internal/captions"
 	"github.com/Cid-Emmerich/SopeBox/internal/download"
 	"github.com/Cid-Emmerich/SopeBox/internal/glyph"
-	"github.com/Cid-Emmerich/SopeBox/internal/mentions"
-	"github.com/Cid-Emmerich/SopeBox/internal/store"
 	"github.com/Cid-Emmerich/SopeBox/internal/transcript"
 	"github.com/Cid-Emmerich/SopeBox/internal/vis"
 )
@@ -299,12 +296,6 @@ func (a *App) settings() []setting {
 	c := a.cfg
 	o := &a.visOpts
 	vo := &a.tracker.Opts
-	playingPodcast := func() *store.Podcast {
-		if a.cur == nil {
-			return nil
-		}
-		return a.cur.Podcast
-	}
 	return []setting{
 		section("Playback"),
 		{"speed", func() string { return fmt.Sprintf("%.2fx", a.pl.Status().Speed) }, func(d int) {
@@ -419,41 +410,6 @@ func (a *App) settings() []setting {
 			}
 			return "not found (brew install whisper-cpp)"
 		}, nil, "", nil},
-
-		section("Collage"),
-		{"collage model", func() string { return c.CollageModel }, func(d int) { c.CollageModel = cycleStr(c.CollageModel, CollageModels, d) },
-			"the Claude model that reads transcripts for the collage: opus is best at telling who is meant, haiku is cheapest", nil},
-		{"collage pictures", func() string {
-			if c.CollageImages == "kitty" && !a.canKitty {
-				return "kitty (not supported here: blocks)"
-			}
-			return c.CollageImages
-		}, func(d int) {
-			c.CollageImages = cycleStr(c.CollageImages, []string{"kitty", "blocks"}, d)
-			a.kt.hide(a.kittyOut)
-		}, "kitty = real pictures in Ghostty/Kitty/WezTerm, blocks = coloured half blocks anywhere", nil},
-		{"collage prep", func() string {
-			if p := playingPodcast(); p != nil {
-				return onOff(p.Collage) + " for " + p.Title
-			}
-			return "nothing playing"
-		}, func(d int) {
-			if p := playingPodcast(); p != nil {
-				a.toggleCollagePrep(p)
-			}
-		}, "the playing podcast's new downloads are transcribed and read by Claude in the background (P in the podcast list does it for any show)", nil},
-		action("ask Claude again", "read this episode's transcript with Claude again, e.g. after changing the model", a.redoMentions),
-		{"Claude API key", func() string {
-			switch {
-			case os.Getenv("ANTHROPIC_API_KEY") != "":
-				return "from ANTHROPIC_API_KEY"
-			case c.AnthropicKey != "":
-				return "set in " + c.ConfigPath
-			case mentions.HaveCredentials(""):
-				return "from your Anthropic login"
-			}
-			return "not set"
-		}, nil, "set ANTHROPIC_API_KEY, or add anthropic_api_key = … to the config file", nil},
 	}
 }
 
